@@ -1,0 +1,200 @@
+[
+  {
+    "resume": {
+      "id": "246c7f3dff08be14220039ed1f4f575a625039",
+      "age": 21,
+      "area": {
+        "id": "1",
+        "url": "https://api.hh.ru/areas/1",
+        "name": "Москва"
+      },
+      "site": [],
+      "metro": null,
+      "owner": {
+        "id": "73921273",
+        "comments": {
+          "url": "https://api.hh.ru/applicant_comments/73921273",
+          "counters": {
+            "total": 0
+          }
+        }
+      },
+      "photo": null,
+      "title": "Java Intern",
+      "gender": {
+        "id": "male",
+        "name": "Мужской"
+      },
+      "salary": null,
+      "skills": "Студент 4-го курса. Изучать программирование начинал с языка C, а затем перешёл на java. Прошёл обучение в одной компании, где познакомился, а также применял такие технологии:\n\nSpring Framework, Spring boot, MyBatis\nPostgreSQL\nGit\nMaven\n\nСсылка на \"pet-project\": \nhttps://bitbucket.org/java-intership2020/internship/src/konstantin_privalov/src/\n",
+      "actions": {
+        "download": {
+          "pdf": {
+            "url": "https://api.hh.ru/resumes/246c7f3dff08be14220039ed1f4f575a625039/download/%D0%9F%D1%80%D0%B8%D0%B2%D0%B0%D0%BB%D0%BE%D0%B2%20%D0%9A%D0%BE%D0%BD%D1%81%D1%82%D0%B0%D0%BD%D1%82%D0%B8%D0%BD.pdf?type=pdf"
+          },
+          "rtf": {
+            "url": "https://api.hh.ru/resumes/246c7f3dff08be14220039ed1f4f575a625039/download/%D0%9F%D1%80%D0%B8%D0%B2%D0%B0%D0%BB%D0%BE%D0%B2%20%D0%9A%D0%BE%D0%BD%D1%81%D1%82%D0%B0%D0%BD%D1%82%D0%B8%D0%BD.rtf?type=rtf"
+          }
+        }
+      },
+      "contact": [
+        {
+          "type": {
+            "id": "cell",
+            "name": "Мобильный телефон"
+          },
+          "value": {
+            "city": "910",
+            "number": "2920108",
+            "country": "7",
+            "formatted": "+7 (910) 292-01-08"
+          },
+          "comment": null,
+          "verified": true,
+          "preferred": false
+        },
+        {
+          "type": {
+            "id": "email",
+            "name": "Эл. почта"
+          },
+          "value": "qqstik@gmail.com",
+          "preferred": true
+        }
+      ],
+      "download": {
+        "pdf": {
+          "url": "https://api.hh.ru/resumes/246c7f3dff08be14220039ed1f4f575a625039/download/%D0%9F%D1%80%D0%B8%D0%B2%D0%B0%D0%BB%D0%BE%D0%B2%20%D0%9A%D0%BE%D0%BD%D1%81%D1%82%D0%B0%D0%BD%D1%82%D0%B8%D0%BD.pdf?type=pdf"
+        },
+        "rtf": {
+          "url": "https://api.hh.ru/resumes/246c7f3dff08be14220039ed1f4f575a625039/download/%D0%9F%D1%80%D0%B8%D0%B2%D0%B0%D0%BB%D0%BE%D0%B2%20%D0%9A%D0%BE%D0%BD%D1%81%D1%82%D0%B0%D0%BD%D1%82%D0%B8%D0%BD.rtf?type=rtf"
+        }
+      },
+      "language": [
+        {
+          "id": "rus",
+          "name": "Русский",
+          "level": {
+            "id": "l1",
+            "name": "Родной"
+          }
+        },
+        {
+          "id": "eng",
+          "name": "Английский",
+          "level": {
+            "id": "b2",
+            "name": "B2 — Средне-продвинутый"
+          }
+        }
+      ],
+      "schedule": {
+        "id": "fullDay",
+        "name": "Полный день"
+      },
+      "education": {
+        "level": {
+          "id": "unfinished_higher",
+          "name": "Неоконченное высшее"
+        },
+        "primary": [
+          {
+            "name": "РТУ МИРЭА",
+            "year": 2021,
+            "result": "Прикладная математика и информатика",
+            "name_id": null,
+            "result_id": "9",
+            "organization": "Кибернитика",
+            "organization_id": null
+          }
+        ],
+        "additional": [],
+        "elementary": [],
+        "attestation": []
+      },
+      "favorited": false,
+      "last_name": "test3",
+      "portfolio": [],
+      "schedules": [
+        {
+          "id": "fullDay",
+          "name": "Полный день"
+        }
+      ],
+      "skill_set": [
+        "Исполнительность"
+      ],
+      "birth_date": "1999-10-02",
+      "created_at": "2021-02-25T00:36:57+0300",
+      "employment": {
+        "id": "full",
+        "name": "Полная занятость"
+      },
+      "experience": [],
+      "first_name": "null3",
+      "relocation": {
+        "area": [],
+        "type": {
+          "id": "no_relocation",
+          "name": "не готов к переезду"
+        }
+      },
+      "updated_at": "2021-03-24T14:51:33+0300",
+      "certificate": [],
+      "citizenship": [
+        {
+          "id": "113",
+          "url": "https://api.hh.ru/areas/113",
+          "name": "Россия"
+        }
+      ],
+      "employments": [
+        {
+          "id": "full",
+          "name": "Полная занятость"
+        }
+      ],
+      "has_vehicle": null,
+      "middle_name": null,
+      "travel_time": {
+        "id": "any",
+        "name": "Не имеет значения"
+      },
+      "work_ticket": [
+        {
+          "id": "113",
+          "url": "https://api.hh.ru/areas/113",
+          "name": "Россия"
+        }
+      ],
+      "alternate_url": "https://hh.ru/resume/246c7f3dff08be14220039ed1f4f575a625039",
+      "hidden_fields": [],
+      "paid_services": [],
+      "resume_locale": {
+        "id": "RU",
+        "name": "Русский"
+      },
+      "recommendation": [],
+      "specialization": [
+        {
+          "id": "15.93",
+          "name": "Информационные технологии, Интернет, Мультимедиа",
+          "laboring": false,
+          "profarea_id": "15",
+          "profarea_name": "Начало карьеры, студенты"
+        }
+      ],
+      "total_experience": null,
+      "can_view_full_info": true,
+      "driver_license_types": [],
+      "negotiations_history": {
+        "url": "https://api.hh.ru/resumes/246c7f3dff08be14220039ed1f4f575a625039/negotiations_history"
+      },
+      "business_trip_readiness": {
+        "id": "never",
+        "name": "не готов к командировкам"
+      }
+    },
+    "rating": 0.4
+  }
+]
