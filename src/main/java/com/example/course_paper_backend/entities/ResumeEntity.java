@@ -40,7 +40,7 @@ public class ResumeEntity {
     private Date updatedAt;
     @Column(name = "skills", nullable = false)
     private String skills;
-    @Column(name = "skills", nullable = false)
+    @Column(name = "skill_set", nullable = false)
     // В БД хранится как строка с разделителем ','
     private String skillSet;
     @Column(name = "alternate_url", nullable = false)

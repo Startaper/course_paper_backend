@@ -31,9 +31,9 @@ public class SiteEntity {
 
     public Site toModel() {
         return new Site().toBuilder()
-                .id(this.id)
-                .type(this.type)
-                .url(this.url)
+                .id(this.getId())
+                .type(this.getType())
+                .url(this.getUrl())
                 .build();
     }
 

@@ -36,9 +36,9 @@ public class ExperienceEntity {
     private String industries;
     @Column(name = "position", nullable = false)
     private String position;
-    @Column(name = "start")
+    @Column(name = "start_date")
     private Date start;
-    @Column(name = "end")
+    @Column(name = "end_date")
     private Date end;
     @OneToOne
     @JoinColumn(name = "area_id", referencedColumnName = "id")

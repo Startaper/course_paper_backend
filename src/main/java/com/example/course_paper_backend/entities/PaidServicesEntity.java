@@ -12,7 +12,7 @@ import org.json.JSONObject;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
-@Table(name = "sites")
+@Table(name = "paid_services")
 public class PaidServicesEntity {
 
     @Id

@@ -18,7 +18,6 @@ public class SpecializationEntity {
     @Id
     @Column(name = "id", nullable = false)
     private String id;
-    @Enumerated(EnumType.STRING)
     @Column(name = "name", nullable = false)
     private String name;
     @Column(name = "laboring", nullable = false)

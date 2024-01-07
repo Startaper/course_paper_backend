@@ -38,8 +38,7 @@ public class ApplicantEntity {
     private int age;
     @Column(name = "photo_url")
     private String photoUrl;
-    @OneToMany(mappedBy = "applicant", cascade = CascadeType.ALL)
-    @Column(name = "area_name", nullable = false)
+    @OneToOne(mappedBy = "applicant", cascade = CascadeType.ALL)
     private AreaEntity area;
     @Enumerated(EnumType.STRING)
     @Column(name = "education_level", nullable = false)

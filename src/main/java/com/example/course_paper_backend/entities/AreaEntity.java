@@ -26,7 +26,7 @@ public class AreaEntity {
     private String name;
     @Column(name = "url", nullable = false)
     private String url;
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "applicant_id", referencedColumnName = "id", nullable = false)
     private ApplicantEntity applicant;
 
