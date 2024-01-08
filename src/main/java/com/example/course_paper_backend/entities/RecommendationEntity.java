@@ -45,7 +45,7 @@ public class RecommendationEntity {
         this.name = jsonObject.getString("name");
         this.organization = jsonObject.getString("organization");
         this.position = jsonObject.getString("position");
-        this.contact = jsonObject.getString("contact");
+        this.contact = jsonObject.optString("contact");
         this.resume = resume;
     }
 }

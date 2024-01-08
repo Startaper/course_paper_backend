@@ -64,14 +64,14 @@ public class ExperienceEntity {
 
     public ExperienceEntity(JSONObject jsonObject, ResumeEntity resume, ApplicantEntity applicant, SimpleDateFormat dateFormat) throws JSONException, ParseException {
         this.id = jsonObject.getLong("id");
-        this.company = jsonObject.getString("company");
-        this.companyId = jsonObject.getString("company_id");
-        this.companyUrl = jsonObject.getString("company_url");
-        this.description = jsonObject.getString("description");
+        this.company = jsonObject.optString("company");
+        this.companyId = jsonObject.optString("company_id");
+        this.companyUrl = jsonObject.optString("company_url");
+        this.description = jsonObject.optString("description");
         this.industries = jsonObject.getString("industries");
         this.position = jsonObject.getString("position");
-        this.start = dateFormat.parse(jsonObject.getString("start"));
-        this.end = dateFormat.parse(jsonObject.getString("end"));
+        this.start = dateFormat.parse(jsonObject.optString("start"));
+        this.end = dateFormat.parse(jsonObject.optString("end"));
         this.area = new AreaEntity(jsonObject.getJSONObject("area"), AreaType.EXPERIENCE, applicant);
         this.resume = resume;
     }

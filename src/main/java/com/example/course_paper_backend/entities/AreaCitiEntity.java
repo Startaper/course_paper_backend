@@ -1,7 +1,7 @@
 package com.example.course_paper_backend.entities;
 
-import com.example.course_paper_backend.enums.LevelLanguage;
-import com.example.course_paper_backend.model.Language;
+import com.example.course_paper_backend.enums.AreaType;
+import com.example.course_paper_backend.model.Area;
 import jakarta.persistence.*;
 import lombok.*;
 import org.json.JSONException;
@@ -13,33 +13,38 @@ import org.json.JSONObject;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
-@Table(name = "language")
-public class LanguageEntity {
+@Table(name = "area_cities")
+public class AreaCitiEntity {
+
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    private LevelLanguage level;
+    private AreaType type;
     @Column(name = "name", nullable = false)
     private String name;
-    @ManyToOne
+    @Column(name = "url", nullable = false)
+    private String url;
+    @OneToOne
     @JoinColumn(name = "applicant_id", referencedColumnName = "id", nullable = false)
     private ApplicantEntity applicant;
 
-    public Language toModel() {
-        return Language.builder()
-                .id(this.getId().toString())
-                .level(this.getLevel())
+    public Area toModel() {
+        return new Area().toBuilder()
+                .id(this.getId())
+                .url(this.getUrl())
                 .name(this.getName())
                 .build();
     }
 
-    public LanguageEntity(JSONObject jsonObject, ApplicantEntity applicant) throws JSONException {
-        this.level = LevelLanguage.valueOf(jsonObject.getJSONObject("level").getString("id").toUpperCase());
+    public AreaCitiEntity(JSONObject jsonObject, AreaType areaType, ApplicantEntity applicant) throws JSONException {
+        this.id = jsonObject.getLong("id");
+        this.type = areaType;
         this.name = jsonObject.getString("name");
+        this.url = jsonObject.getString("url");
         this.applicant = applicant;
     }
+
 }

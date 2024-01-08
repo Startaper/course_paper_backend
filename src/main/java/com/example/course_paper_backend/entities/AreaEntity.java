@@ -29,6 +29,8 @@ public class AreaEntity {
     @OneToOne
     @JoinColumn(name = "applicant_id", referencedColumnName = "id", nullable = false)
     private ApplicantEntity applicant;
+    @OneToOne(mappedBy = "area")
+    private ExperienceEntity experience;
 
     public Area toModel() {
         return new Area().toBuilder()

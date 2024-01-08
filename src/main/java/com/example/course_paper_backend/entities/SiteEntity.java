@@ -38,7 +38,7 @@ public class SiteEntity {
     }
 
     public SiteEntity(JSONObject jsonObject, ApplicantEntity applicant) throws JSONException {
-        this.type = SiteType.valueOf(jsonObject.getJSONObject("type").getString("id"));
+        this.type = SiteType.valueOf(jsonObject.getJSONObject("type").getString("id").toUpperCase());
         this.url = jsonObject.getString("url");
         this.applicant = applicant;
     }

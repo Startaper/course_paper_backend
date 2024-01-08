@@ -58,12 +58,12 @@ public class EducationEntity {
     public EducationEntity(JSONObject jsonObject, EducationType type, ApplicantEntity applicant) throws JSONException {
         this.type = type;
         this.name = jsonObject.getString("name");
-        this.nameId = jsonObject.getString("name_id");
+        this.nameId = jsonObject.optString("name_id");
         this.year = jsonObject.getInt("year");
-        this.result = jsonObject.getString("result");
-        this.resultId = jsonObject.getString("result_id");
-        this.organization = jsonObject.getString("organization");
-        this.organizationId = jsonObject.getString("organization_id");
+        this.result = jsonObject.optString("result");
+        this.resultId = jsonObject.optString("result_id");
+        this.organization = jsonObject.optString("organization");
+        this.organizationId = jsonObject.optString("organization_id");
         this.applicant = applicant;
     }
 }

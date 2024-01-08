@@ -1,11 +1,12 @@
-package com.example.course_paper_backend.services;
+package com.example.course_paper_backend.services.impl;
 
 import com.example.course_paper_backend.entities.*;
 import com.example.course_paper_backend.enums.AreaType;
 import com.example.course_paper_backend.enums.EducationType;
+import com.example.course_paper_backend.enums.ResumeStatus;
+import com.example.course_paper_backend.exceptions.AlreadyExistsException;
 import com.example.course_paper_backend.exceptions.NotFoundException;
-import com.example.course_paper_backend.repositories.ApplicantRepo;
-import com.example.course_paper_backend.repositories.ResumeRepo;
+import com.example.course_paper_backend.repositories.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,16 +20,40 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class AdminService {
+public class AdminServiceImpl {
 
     private final ResumeRepo resumeRepo;
     private final ApplicantRepo applicantRepo;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat();
+    private final PaidServicesRepo paidServicesRepo;
+    private final SpecializationRepo specializationRepo;
+    private final ExperienceRepo experienceRepo;
+    private final LanguageRepo languageRepo;
+    private final AreaCitiRepo areaCitiRepo;
+    private final SiteRepo siteRepo;
+    private final EducationRepo educationRepo;
+    private final RecommendationRepo recommendationRepo;
+    private final CertificateRepo certificateRepo;
+    private final ContactRepo contactRepo;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     @Autowired
-    public AdminService(ResumeRepo resumeRepo, ApplicantRepo applicantRepo) {
+    public AdminServiceImpl(ResumeRepo resumeRepo, ApplicantRepo applicantRepo, PaidServicesRepo paidServicesRepo,
+                            SpecializationRepo specializationRepo, ExperienceRepo experienceRepo,
+                            LanguageRepo languageRepo, AreaCitiRepo areaCitiRepo, SiteRepo siteRepo,
+                            EducationRepo educationRepo, RecommendationRepo recommendationRepo,
+                            CertificateRepo certificateRepo, ContactRepo contactRepo) {
         this.resumeRepo = resumeRepo;
         this.applicantRepo = applicantRepo;
+        this.paidServicesRepo = paidServicesRepo;
+        this.specializationRepo = specializationRepo;
+        this.experienceRepo = experienceRepo;
+        this.languageRepo = languageRepo;
+        this.areaCitiRepo = areaCitiRepo;
+        this.siteRepo = siteRepo;
+        this.educationRepo = educationRepo;
+        this.recommendationRepo = recommendationRepo;
+        this.certificateRepo = certificateRepo;
+        this.contactRepo = contactRepo;
     }
 
     public void deleteById(UUID id) throws NotFoundException {
@@ -40,9 +65,10 @@ public class AdminService {
 
     public void deleteAll() {
         resumeRepo.deleteAll();
+        applicantRepo.deleteAll();
     }
 
-    public List<ResumeEntity> addAll(JSONArray jsonArray) throws JSONException, ParseException {
+    public List<ResumeEntity> addAll(JSONArray jsonArray) throws JSONException, ParseException, AlreadyExistsException {
         List<ResumeEntity> resumes = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++) {
             resumes.add(add(jsonArray.getJSONObject(i).getJSONObject("resume")));
@@ -50,37 +76,62 @@ public class AdminService {
         return resumes;
     }
 
-    public ResumeEntity add(JSONObject json) throws JSONException, ParseException {
+    public ResumeEntity add(JSONObject json) throws JSONException, ParseException, AlreadyExistsException {
         ResumeEntity resume = new ResumeEntity(json, dateFormat);
-        resume.setId(UUID.fromString(json.getString("id")));
+
+        if (resumeRepo.existsByExternalId(json.getString("id"))) {
+            throw new AlreadyExistsException("Такое резюме уже существует в БД!");
+        }
+
+//        resume.setId(UUID.fromString(json.getString("id")));
+        resume.setId(UUID.randomUUID());
+        resume.setExternalId(json.getString("id"));
+
         // Проверка существования такого соискателя в базе
         // Если в БД есть схождение, то к "профилю" соискателя добавляется новое резюме
         // Иначе создается новый соискатель в БД.
-        ApplicantEntity applicantEntity = applicantRepo.findByFirstNameAndLastNameAndMiddleNameAndBirthDate(json.getString("last_name"),
-                json.getString("first_name"), json.getString("middle_name"), dateFormat.parse(json.getString("birth_date")))
-                .orElse(getApplicantFromJSONObject(json));
+        ApplicantEntity applicantEntity = applicantRepo.findByExternalId(getExternalIdByJson(json));
+
+        if (applicantEntity == null) {
+            applicantEntity = getApplicantFromJSONObject(json);
+        }
         resume.setApplicant(applicantEntity);
 
         resume.setSchedules(convertFromJsonArrayToString(json.getJSONArray("schedules")));
         resume.setEmployments(convertFromJsonArrayToString(json.getJSONArray("employments")));
         resume.setHiddenFields(convertFromJsonArrayToString(json.getJSONArray("hidden_fields")));
         resume.setDriverLicenseTypes(convertFromJsonArrayToString(json.getJSONArray("driver_license_types")));
+        resume.setStatus(ResumeStatus.NEW);
+
+        resume = resumeRepo.save(resume);
+
         resume.setPaidServices(convertFromJSONObjectToPaidServicesEntityList(json.getJSONArray("paid_services"), resume));
-        resume.setSpecializations(convertFromJSONObjectToSpecializationEntityList(json.getJSONArray("specializations"), resume));
-        resume.setRecommendations(convertFromJSONObjectToRecommendationEntityList(json.getJSONArray("recommendations"), resume));
+        resume.setSpecializations(convertFromJSONObjectToSpecializationEntityList(json.getJSONArray("specialization"), resume));
+        resume.setRecommendations(convertFromJSONObjectToRecommendationEntityList(json.getJSONArray("recommendation"), resume));
         resume.setExperience(convertFromJSONObjectToExperienceEntityList(json.getJSONArray("experience"), resume, resume.getApplicant()));
 
         return resumeRepo.save(resume);
     }
 
+    private String getExternalIdByJson(JSONObject jsonObject) throws JSONException {
+        return jsonObject.getInt("age") + "_" +
+                jsonObject.getString("last_name") +
+                jsonObject.getString("first_name") +
+                jsonObject.getString("middle_name");
+    }
+
     private ApplicantEntity getApplicantFromJSONObject(JSONObject jsonObject) throws JSONException, ParseException {
         ApplicantEntity applicant = new ApplicantEntity(jsonObject, dateFormat);
+        applicant.setId(UUID.randomUUID());
+        applicant.setExternalId(getExternalIdByJson(jsonObject));
+        applicant = applicantRepo.save(applicant);
+
         applicant.setSite(convertFromJSONObjectToSiteEntityList(jsonObject.getJSONArray("site"), applicant));
         applicant.setLanguages(convertFromJSONObjectToLanguageEntityList(jsonObject.getJSONArray("language"), applicant));
         applicant.setCertificates(convertFromJSONObjectToCertificateEntityList(jsonObject.getJSONArray("certificate"), applicant));
         applicant.setContacts(convertFromJSONObjectToContactEntityList(jsonObject.getJSONArray("contact"), applicant));
-        applicant.setCitizenship(convertFromJSONObjectToCitizenshipEntityList(jsonObject.getJSONArray("citizenship"), applicant));
-        applicant.setWorkTickets(convertFromJSONObjectToWorkTicketEntityList(jsonObject.getJSONArray("work_ticket"), applicant));
+        applicant.setCitizenship(convertFromJSONObjectToAreaCitiEntityList(jsonObject.getJSONArray("citizenship"), AreaType.CITIZENSHIP, applicant));
+        applicant.setWorkTickets(convertFromJSONObjectToAreaCitiEntityList(jsonObject.getJSONArray("work_ticket"), AreaType.WORK_TICKET, applicant));
 
         List<EducationEntity> educations = new ArrayList<>();
         JSONArray jsonArray;
@@ -105,14 +156,14 @@ public class AdminService {
             educations.addAll(convertFromJSONObjectToEducationEntityList(jsonArray, EducationType.ELEMENTARY, applicant));
         }
         applicant.setEducations(educations);
-        return applicant;
+        return applicantRepo.save(applicant);
     }
 
     private String convertFromJsonArrayToString(JSONArray jsonArray) throws JSONException {
         StringBuilder string = new StringBuilder();
-        if (jsonArray == null) return null;
+        if (jsonArray == null || jsonArray.length() == 0) return null;
         for (int i = 0; i < jsonArray.length(); i++) {
-            string.append(jsonArray.getJSONObject(i).getString("id"));
+            string.append(jsonArray.getJSONObject(i).getString("id").toUpperCase());
         }
         return string.toString();
     }
@@ -121,7 +172,7 @@ public class AdminService {
         List<PaidServicesEntity> list = new ArrayList<>();
         if (jsonArray == null) return null;
         for (int i = 0; i < jsonArray.length(); i++) {
-            list.add(new PaidServicesEntity(jsonArray.getJSONObject(i), resume));
+            list.add(paidServicesRepo.save(new PaidServicesEntity(jsonArray.getJSONObject(i), resume)));
         }
         return list;
     }
@@ -130,7 +181,7 @@ public class AdminService {
         List<SpecializationEntity> list = new ArrayList<>();
         if (jsonArray == null) return null;
         for (int i = 0; i < jsonArray.length(); i++) {
-            list.add(new SpecializationEntity(jsonArray.getJSONObject(i), resume));
+            list.add(specializationRepo.save(new SpecializationEntity(jsonArray.getJSONObject(i), resume)));
         }
         return list;
     }
@@ -139,7 +190,7 @@ public class AdminService {
         List<RecommendationEntity> list = new ArrayList<>();
         if (jsonArray == null) return null;
         for (int i = 0; i < jsonArray.length(); i++) {
-            list.add(new RecommendationEntity(jsonArray.getJSONObject(i), resume));
+            list.add(recommendationRepo.save(new RecommendationEntity(jsonArray.getJSONObject(i), resume)));
         }
         return list;
     }
@@ -148,7 +199,7 @@ public class AdminService {
         List<ExperienceEntity> list = new ArrayList<>();
         if (jsonArray == null) return null;
         for (int i = 0; i < jsonArray.length(); i++) {
-            list.add(new ExperienceEntity(jsonArray.getJSONObject(i), resume, applicant, dateFormat));
+            list.add(experienceRepo.save(new ExperienceEntity(jsonArray.getJSONObject(i), resume, applicant, dateFormat)));
         }
         return list;
     }
@@ -157,7 +208,7 @@ public class AdminService {
         List<ContactEntity> list = new ArrayList<>();
         if (jsonArray == null) return null;
         for (int i = 0; i < jsonArray.length(); i++) {
-            list.add(new ContactEntity(jsonArray.getJSONObject(i), applicant));
+            list.add(contactRepo.save(new ContactEntity(jsonArray.getJSONObject(i), applicant)));
         }
         return list;
     }
@@ -166,7 +217,7 @@ public class AdminService {
         List<LanguageEntity> list = new ArrayList<>();
         if (jsonArray == null) return null;
         for (int i = 0; i < jsonArray.length(); i++) {
-            list.add(new LanguageEntity(jsonArray.getJSONObject(i), applicant));
+            list.add(languageRepo.save(new LanguageEntity(jsonArray.getJSONObject(i), applicant)));
         }
         return list;
     }
@@ -175,7 +226,7 @@ public class AdminService {
         List<SiteEntity> list = new ArrayList<>();
         if (jsonArray == null) return null;
         for (int i = 0; i < jsonArray.length(); i++) {
-            list.add(new SiteEntity(jsonArray.getJSONObject(i), applicant));
+            list.add(siteRepo.save(new SiteEntity(jsonArray.getJSONObject(i), applicant)));
         }
         return list;
     }
@@ -184,25 +235,16 @@ public class AdminService {
         List<CertificateEntity> list = new ArrayList<>();
         if (jsonArray == null) return null;
         for (int i = 0; i < jsonArray.length(); i++) {
-            list.add(new CertificateEntity(jsonArray.getJSONObject(i), dateFormat, applicant));
+            list.add(certificateRepo.save(new CertificateEntity(jsonArray.getJSONObject(i), dateFormat, applicant)));
         }
         return list;
     }
 
-    private List<AreaEntity> convertFromJSONObjectToCitizenshipEntityList(JSONArray jsonArray, ApplicantEntity applicant) throws JSONException {
-        List<AreaEntity> list = new ArrayList<>();
+    private List<AreaCitiEntity> convertFromJSONObjectToAreaCitiEntityList(JSONArray jsonArray, AreaType type, ApplicantEntity applicant) throws JSONException {
+        List<AreaCitiEntity> list = new ArrayList<>();
         if (jsonArray == null) return null;
         for (int i = 0; i < jsonArray.length(); i++) {
-            list.add(new AreaEntity(jsonArray.getJSONObject(i), AreaType.CITIZENSHIP, applicant));
-        }
-        return list;
-    }
-
-    private List<AreaEntity> convertFromJSONObjectToWorkTicketEntityList(JSONArray jsonArray, ApplicantEntity applicant) throws JSONException {
-        List<AreaEntity> list = new ArrayList<>();
-        if (jsonArray == null) return null;
-        for (int i = 0; i < jsonArray.length(); i++) {
-            list.add(new AreaEntity(jsonArray.getJSONObject(i), AreaType.WORK_TICKET, applicant));
+            list.add(areaCitiRepo.save(new AreaCitiEntity(jsonArray.getJSONObject(i), type, applicant)));
         }
         return list;
     }
@@ -210,7 +252,7 @@ public class AdminService {
     private List<EducationEntity> convertFromJSONObjectToEducationEntityList(JSONArray jsonArray, EducationType type, ApplicantEntity applicant) throws JSONException {
         List<EducationEntity> list = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++) {
-            list.add(new EducationEntity(jsonArray.getJSONObject(i), type, applicant));
+            list.add(educationRepo.save(new EducationEntity(jsonArray.getJSONObject(i), type, applicant)));
         }
         return list;
     }

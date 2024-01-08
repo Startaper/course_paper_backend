@@ -1,11 +1,11 @@
-package com.example.course_paper_backend.services;
+package com.example.course_paper_backend.services.impl;
 
 import com.example.course_paper_backend.entities.ResumeEntity;
 import com.example.course_paper_backend.enums.ResumeStatus;
 import com.example.course_paper_backend.exceptions.NotFoundException;
 import com.example.course_paper_backend.model.Resume;
 import com.example.course_paper_backend.repositories.ResumeRepo;
-import com.example.course_paper_backend.services.impl.BasicServiceImpl;
+import com.example.course_paper_backend.services.BasicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,12 +14,12 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class MainService implements BasicServiceImpl<Resume, ResumeEntity> {
+public class MainServiceImpl implements BasicService<Resume, ResumeEntity> {
 
     private final ResumeRepo resumeRepo;
 
     @Autowired
-    public MainService(ResumeRepo resumeRepo) {
+    public MainServiceImpl(ResumeRepo resumeRepo) {
         this.resumeRepo = resumeRepo;
     }
 
@@ -41,12 +41,6 @@ public class MainService implements BasicServiceImpl<Resume, ResumeEntity> {
                 .orElseThrow(() -> new NotFoundException("Резюме с указанным id не найден!"));
         resumeEntity.setStatus(status);
         return resumeRepo.save(resumeEntity);
-    }
-
-    @Override
-    @Deprecated
-    public void delete(UUID id) {
-
     }
 
     @Override

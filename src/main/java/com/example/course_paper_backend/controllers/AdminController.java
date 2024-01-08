@@ -2,10 +2,12 @@ package com.example.course_paper_backend.controllers;
 
 import com.example.course_paper_backend.entities.ResumeEntity;
 import com.example.course_paper_backend.enums.ResumeStatus;
+import com.example.course_paper_backend.exceptions.AlreadyExistsException;
 import com.example.course_paper_backend.exceptions.NotFoundException;
 import com.example.course_paper_backend.model.ResponseV1;
-import com.example.course_paper_backend.services.AdminService;
-import com.example.course_paper_backend.services.MainService;
+import com.example.course_paper_backend.model.Resume;
+import com.example.course_paper_backend.services.impl.AdminServiceImpl;
+import com.example.course_paper_backend.services.impl.MainServiceImpl;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,19 +15,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/admin/resumes")
 public class AdminController {
 
-    private final AdminService adminService;
-    private final MainService mainService;
+    private final AdminServiceImpl adminService;
+    private final MainServiceImpl mainService;
 
     @Autowired
-    public AdminController(AdminService adminService, MainService mainService) {
+    public AdminController(AdminServiceImpl adminService, MainServiceImpl mainService) {
         this.adminService = adminService;
         this.mainService = mainService;
     }
@@ -34,16 +34,18 @@ public class AdminController {
     public ResponseEntity get(@PathVariable("id") UUID id) throws NotFoundException {
         return ResponseEntity.ok(new ResponseV1().toBuilder()
                 .count(1)
-                .resumes(Collections.singletonList(mainService.get(id)))
+                .resumes(Collections.singletonList(mainService.get(id).toModel()))
                 .build());
     }
 
     @GetMapping("/")
     public ResponseEntity getAll() {
-        List<ResumeEntity> resumeEntities = mainService.getAll();
+        List<Resume> resumes = mainService.getAll().stream()
+                .map(ResumeEntity::toModel)
+                .toList();
         return ResponseEntity.ok(new ResponseV1().toBuilder()
-                .resumes(Collections.singletonList(resumeEntities))
-                .count(resumeEntities.size())
+                .resumes(resumes)
+                .count(resumes.size())
                 .build());
     }
 
@@ -52,17 +54,31 @@ public class AdminController {
                                        @RequestParam(name = "status") ResumeStatus status) throws NotFoundException {
         return ResponseEntity.ok(new ResponseV1().toBuilder()
                 .count(1)
-                .resumes(Collections.singletonList(mainService.updateStatus(id, status)))
+                .resumes(Collections.singletonList(mainService.updateStatus(id, status).toModel()))
                 .build());
     }
 
     @PostMapping("/")
-    public ResponseEntity addAll(@RequestBody JSONArray jsonArray) throws JSONException, ParseException {
-        List<ResumeEntity> resumes = adminService.addAll(jsonArray);
+    public ResponseEntity addAll(@RequestBody String jsonArray) throws JSONException, ParseException, AlreadyExistsException {
+        List<Resume> resumes = adminService.addAll(new JSONArray(jsonArray)).stream()
+                .map(ResumeEntity::toModel)
+                .toList();
         return ResponseEntity.ok(new ResponseV1().toBuilder()
-                .resumes(Collections.singletonList(resumes))
+                .resumes(resumes)
                 .count(resumes.size())
                 .build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity delete(@PathVariable("id") UUID id) throws NotFoundException {
+        adminService.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/")
+    public ResponseEntity deleteAll() {
+        adminService.deleteAll();
+        return ResponseEntity.ok().build();
     }
 
 }

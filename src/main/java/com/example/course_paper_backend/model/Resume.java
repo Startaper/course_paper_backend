@@ -21,7 +21,6 @@ public class Resume {
     private String lastName;
     private String firstName;
     private String middleName;
-    private String commentsUrl;
     private String resumeLocale;
     private String alternateUrl;
     private String urlDownloadPdf;
@@ -49,7 +48,7 @@ public class Resume {
     private ResumeStatus status;
     private TravelTimeType travelTime;
     // В БД хранится как строка с разделителем ','
-    private EmploymentType[] employments;
+    private String[] employments;
     private EducationLevel educationLevel;
     private BusinessTripReadinessType businessTripReadiness;
     private List<Site> site;

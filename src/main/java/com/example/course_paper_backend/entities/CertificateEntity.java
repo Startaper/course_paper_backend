@@ -51,7 +51,7 @@ public class CertificateEntity {
     }
 
     public CertificateEntity(JSONObject jsonObject, SimpleDateFormat dateFormat, ApplicantEntity applicant) throws JSONException, ParseException {
-        this.type = CertificateType.valueOf(jsonObject.getString("type"));
+        this.type = CertificateType.valueOf(jsonObject.getString("type").toUpperCase());
         this.achievedAt = dateFormat.parse(jsonObject.getString("achieved_at"));
         this.owner = jsonObject.getString("owner");
         this.title = jsonObject.getString("title");

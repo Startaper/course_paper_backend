@@ -47,9 +47,9 @@ public class ContactEntity {
     }
 
     public ContactEntity(JSONObject jsonObject, ApplicantEntity applicant) throws JSONException {
-        this.type = ContactType.valueOf(jsonObject.getJSONObject("type").getString("id"));
-        this.comment = jsonObject.getString("comment");
-        this.verified = jsonObject.getBoolean("verified");
+        this.type = ContactType.valueOf(jsonObject.getJSONObject("type").getString("id").toUpperCase());
+        this.comment = jsonObject.optString("comment");
+        this.verified = jsonObject.optBoolean("verified");
         this.preferred = jsonObject.getBoolean("preferred");
         this.applicant = applicant;
 

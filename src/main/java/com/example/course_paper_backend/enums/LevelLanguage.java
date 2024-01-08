@@ -7,7 +7,8 @@ public enum LevelLanguage {
     B1("Cредний", "Pre-Intermediate/Intermediate"),
     B2("Cредне-продвинутый", "Upper Intermediate"),
     C1("Продвинутый", "Advanced"),
-    C2("В совершенстве", "Proficiency");
+    C2("В совершенстве", "Proficiency"),
+    L1("Родной", "Native");
 
     private final String ruName;
     private final String internationalName;
