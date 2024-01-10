@@ -18,7 +18,7 @@ import java.text.ParseException;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/admin/resumes")
+@RequestMapping("/admin/api/resumes")
 public class AdminController {
 
     private final AdminServiceImpl adminService;

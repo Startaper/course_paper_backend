@@ -45,6 +45,7 @@ public class Resume {
     private boolean favorited;
     private boolean canViewFullInfo;
     private Area area;
+    private Gender gender;
     private ResumeStatus status;
     private TravelTimeType travelTime;
     // В БД хранится как строка с разделителем ','
