@@ -32,8 +32,13 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UserEntity register(UserEntity user) throws InvalidFieldsException, AlreadyExistsException {
-        List<RoleEntity> userRoles = Collections.singletonList(roleRepository.findByName("ROLE_USER"));
+    public UserEntity register(UserEntity user, boolean isAdmin) throws InvalidFieldsException, AlreadyExistsException {
+        List<RoleEntity> userRoles = new ArrayList<>();
+        if (isAdmin) {
+            userRoles.add(roleRepository.findByName("ROLE_ADMIN"));
+        } else {
+            userRoles.add(roleRepository.findByName("ROLE_USER"));
+        }
 
         String username = user.getEmail().substring(0, user.getEmail().indexOf("@"));
 

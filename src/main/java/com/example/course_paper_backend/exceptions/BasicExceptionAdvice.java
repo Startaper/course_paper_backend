@@ -1,6 +1,8 @@
 package com.example.course_paper_backend.exceptions;
 
 import com.example.course_paper_backend.model.ResponseV1;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import org.json.JSONException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,42 @@ public class BasicExceptionAdvice {
                 .message(e.getMessage())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(JwtAuthenticationException.class)
+    public ResponseEntity<ResponseV1> handleException(JwtAuthenticationException e) {
+        ResponseV1 response = new ResponseV1().toBuilder()
+                .errorCode(HttpStatus.FORBIDDEN.value())
+                .message(e.getMessage())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ResponseV1> handleException(ExpiredJwtException e) {
+        ResponseV1 response = new ResponseV1().toBuilder()
+                .errorCode(HttpStatus.FORBIDDEN.value())
+                .message(e.getMessage())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ResponseV1> handleException(IllegalArgumentException e) {
+        ResponseV1 response = new ResponseV1().toBuilder()
+                .errorCode(HttpStatus.BAD_REQUEST.value())
+                .message(e.getMessage())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ResponseV1> handleException(JwtException e) {
+        ResponseV1 response = new ResponseV1().toBuilder()
+                .errorCode(HttpStatus.BAD_REQUEST.value())
+                .message(e.getMessage())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AlreadyExistsException.class)

@@ -2,6 +2,7 @@ package com.example.course_paper_backend.entities;
 
 import com.example.course_paper_backend.enums.AreaType;
 import com.example.course_paper_backend.enums.EducationLevel;
+import com.example.course_paper_backend.enums.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 import org.json.JSONException;
@@ -34,14 +35,17 @@ public class ApplicantEntity {
     private String lastName;
     @Column(name = "middle_name")
     private String middleName;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender")
+    private Gender gender;
     @Column(name = "birth_date", nullable = false)
     private Date birthDate;
     @Column(name = "age", nullable = false)
     private int age;
     @Column(name = "photo_url", length = 1000)
     private String photoUrl;
-    @OneToOne(mappedBy = "applicant", cascade = CascadeType.ALL)
-    private AreaEntity area;
+    @Column(name = "area", length = 500)
+    private String area;
     @Enumerated(EnumType.STRING)
     @Column(name = "education_level", nullable = false)
     private EducationLevel educationLevel;
@@ -67,9 +71,10 @@ public class ApplicantEntity {
         this.lastName = jsonObject.getString("last_name");
         this.firstName = jsonObject.getString("first_name");
         this.middleName = jsonObject.optString("middle_name");
+        this.gender = Gender.valueOf(jsonObject.getJSONObject("gender").getString("id").toUpperCase());
         this.birthDate = dateFormat.parse(jsonObject.getString("birth_date"));
         this.age = jsonObject.getInt("age");
-        this.area = new AreaEntity(jsonObject.getJSONObject("area"), AreaType.AREA, this);
+        this.area = jsonObject.getJSONObject("area").getString("name");
         this.educationLevel = EducationLevel.valueOf(jsonObject.getJSONObject("education").getJSONObject("level")
                 .getString("id").toUpperCase());
         this.photoUrl = jsonObject.optJSONObject("photo") != null ? jsonObject.getJSONObject("photo").optString("medium") : null;

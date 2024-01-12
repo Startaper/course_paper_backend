@@ -28,9 +28,6 @@ public class ResumeEntity {
     private UUID id;
     @Column(name = "external_id", length = 1000, nullable = false)
     private String externalId;
-    @Enumerated(EnumType.STRING)
-    @Column(name = "gender", nullable = false)
-    private Gender gender;
     @ManyToOne
     @JoinColumn(name = "applicant_id", referencedColumnName = "id", nullable = false)
     private ApplicantEntity applicant;
@@ -100,7 +97,7 @@ public class ResumeEntity {
     public Resume toModel() {
         return new Resume().toBuilder()
                 .id(this.getId())
-                .gender(this.getGender())
+                .gender(this.getApplicant().getGender())
                 .title(this.getTitle())
                 .skills(this.getSkills())
                 .lastName(this.getApplicant().getLastName())
@@ -130,7 +127,7 @@ public class ResumeEntity {
                 .educationLevel(this.getApplicant().getEducationLevel())
                 .businessTripReadiness(this.getBusinessTripReadiness())
                 .employments(this.getEmployments().split(","))
-                .area(this.getApplicant().getArea().toModel())
+                .area(this.getApplicant().getArea())
                 .site(this.getApplicant().getSite().stream()
                         .map(SiteEntity::toModel)
                         .toList())

@@ -44,7 +44,7 @@ public class Resume {
     private boolean viewed;
     private boolean favorited;
     private boolean canViewFullInfo;
-    private Area area;
+    private String area;
     private Gender gender;
     private ResumeStatus status;
     private TravelTimeType travelTime;

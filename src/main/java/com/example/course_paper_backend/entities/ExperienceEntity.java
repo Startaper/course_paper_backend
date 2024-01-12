@@ -42,7 +42,7 @@ public class ExperienceEntity {
     private Date end;
     @OneToOne
     @JoinColumn(name = "area_id", referencedColumnName = "id")
-    private AreaEntity area;
+    private AreaCitiEntity area;
     @ManyToOne
     @JoinColumn(name = "resume_id", referencedColumnName = "id", nullable = false)
     private ResumeEntity resume;
@@ -72,7 +72,7 @@ public class ExperienceEntity {
         this.position = jsonObject.getString("position");
         this.start = dateFormat.parse(jsonObject.optString("start"));
         this.end = dateFormat.parse(jsonObject.optString("end"));
-        this.area = new AreaEntity(jsonObject.getJSONObject("area"), AreaType.EXPERIENCE, applicant);
+        this.area = new AreaCitiEntity(jsonObject.getJSONObject("area"), AreaType.EXPERIENCE, applicant);
         this.resume = resume;
     }
 }

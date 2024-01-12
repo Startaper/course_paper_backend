@@ -1,8 +1,7 @@
 package com.example.course_paper_backend.services.impl;
 
 import com.example.course_paper_backend.entities.ResumeEntity;
-import com.example.course_paper_backend.enums.EducationLevel;
-import com.example.course_paper_backend.enums.ResumeStatus;
+import com.example.course_paper_backend.enums.*;
 import com.example.course_paper_backend.exceptions.NotFoundException;
 import com.example.course_paper_backend.model.Resume;
 import com.example.course_paper_backend.repositories.ResumeRepo;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -31,59 +29,51 @@ public class MainServiceImpl implements BasicService<Resume, ResumeEntity> {
                 .orElseThrow(() -> new NotFoundException("Резюме с указанным id не найден!"));
     }
 
-    public List<ResumeEntity> getAll() {
-        List<ResumeEntity> resumes = new ArrayList<>();
-        resumeRepo.findAll().forEach(resumes::add);
-        return resumes;
-    }
+    public List<ResumeEntity> getAllByFilter(ResumeStatus status, String areaName, Gender gender, TravelTimeType travelTimeType,
+                                             EducationLevel educationLevel, BusinessTripReadinessType businessTripReadinessType,
+                                             String ageStart, String ageEnd, String salaryStart, String salaryEnd) {
+        List<ResumeEntity> result = new ArrayList<>();
+        resumeRepo.findAll().forEach(result::add);
 
-    public List<ResumeEntity> getAllByFilter_Var1(ResumeStatus status, String areaName, EducationLevel educationLevel,
-                                             int ageStart, int ageEnd, int salaryStart, int salaryEnd) {
-        return resumeRepo.findAllByStatusOrApplicant_Area_NameOrApplicant_EducationLevelOrApplicant_AgeBetweenOrSalaryBetween(
-                status, areaName, educationLevel, ageStart, ageEnd, salaryStart, salaryEnd
-        );
-    }
-
-    public List<ResumeEntity> getAllByFilter_Var2(Map<String, String> filters) {
-        ResumeStatus status = ResumeStatus.valueOf(filters.get("status"));
-        EducationLevel educationLevel = EducationLevel.valueOf(filters.get("educationLevel"));
-
-        return resumeRepo.findAllByStatusOrApplicant_Area_NameOrApplicant_EducationLevelOrApplicant_AgeBetweenOrSalaryBetween(
-                status, filters.get("areaName"), educationLevel,
-                Integer.parseInt(filters.get("ageStart")), Integer.parseInt(filters.get("ageEnd")),
-                Integer.parseInt(filters.get("salaryStart")), Integer.parseInt(filters.get("salaryEnd"))
-        );
-    }
-
-    public List<ResumeEntity> getAllByFilter_Var3(Map<String, String> filters) {
-        List<ResumeEntity> result = resumeRepo.findAllByStatus(ResumeStatus.valueOf(filters.get("status")));
-        if (filters.containsKey("educationLevel") && filters.get("educationLevel") != null) {
-            result.retainAll(resumeRepo.findAllByApplicant_EducationLevel(EducationLevel.valueOf(filters.get("educationLevel"))));
+        if (status != null) {
+            result.retainAll(resumeRepo.findAllByStatus(status));
         }
-        if (filters.containsKey("areaName") && filters.get("areaName") != null) {
-            result.retainAll(resumeRepo.findAllByApplicant_Area_Name(filters.get("areaName")));
+        if (gender != null) {
+            result.retainAll(resumeRepo.findAllByApplicant_Gender(gender));
+        }
+        if (travelTimeType != null) {
+            result.retainAll(resumeRepo.findAllByTravelTime(travelTimeType));
+        }
+        if (businessTripReadinessType != null) {
+            result.retainAll(resumeRepo.findAllByBusinessTripReadiness(businessTripReadinessType));
+        }
+        if (educationLevel != null) {
+            result.retainAll(resumeRepo.findAllByApplicant_EducationLevel(educationLevel));
+        }
+        if (areaName != null && !areaName.isBlank()) {
+            result.retainAll(resumeRepo.findAllByApplicant_Area(areaName));
         }
 
         int start = 0;
         int end = Integer.MAX_VALUE;
 
         // Age between start, end
-        if (filters.containsKey("ageStart") && filters.get("ageStart") != null) {
-            start = Integer.parseInt(filters.get("ageStart"));
+        if (ageStart != null && !ageStart.isBlank()) {
+            start = Integer.parseInt(ageStart);
         }
-        if (filters.containsKey("ageEnd") && filters.get("ageEnd") != null) {
-            end = Integer.parseInt(filters.get("ageEnd"));
+        if (ageEnd != null && !ageEnd.isBlank()) {
+            end = Integer.parseInt(ageEnd);
         }
         result.retainAll(resumeRepo.findAllByApplicant_AgeBetween(start, end));
 
         // Salary between start, end
         start = 0;
         end = Integer.MAX_VALUE;
-        if (filters.containsKey("salaryStart") && filters.get("salaryStart") != null) {
-            start = Integer.parseInt(filters.get("salaryStart"));
+        if (salaryStart != null && !salaryStart.isBlank()) {
+            start = Integer.parseInt(salaryStart);
         }
-        if (filters.containsKey("salaryEnd") && filters.get("salaryEnd") != null) {
-            end = Integer.parseInt(filters.get("salaryEnd"));
+        if (salaryEnd != null && !salaryEnd.isBlank()) {
+            end = Integer.parseInt(salaryEnd);
         }
         result.retainAll(resumeRepo.findAllBySalaryBetween(start, end));
 
