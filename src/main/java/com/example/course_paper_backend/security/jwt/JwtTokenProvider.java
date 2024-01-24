@@ -70,14 +70,15 @@ public class JwtTokenProvider {
         return null;
     }
 
-    public boolean validateToken(String token) {
+    public boolean validateToken(String token) throws JwtAuthenticationException {
+        Jws<Claims> claims;
         try {
-            Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
-
-            return !claims.getBody().getExpiration().before(new Date());
-        } catch (ExpiredJwtException | IllegalArgumentException e) {
-            throw new JwtAuthenticationException("Истек срок жизни токена! Просьба авторизуйтесь по новой.");
+            JwtParser jwtParser = Jwts.parserBuilder().setSigningKey(secretKey).build();
+            claims = jwtParser.parseClaimsJws(token);
+        } catch (Exception e) {
+            throw new JwtAuthenticationException("Не валидный токен!");
         }
+        return !claims.getBody().getExpiration().before(new Date());
     }
 
     private List<String> getRoleNames(List<RoleEntity> userRoles) {

@@ -12,7 +12,7 @@ import java.util.Date;
 public class Experience {
 
     private Long id;
-    private Area area;
+    private String area;
     private String company;
     private String companyId;
     private String companyUrl;

@@ -43,12 +43,13 @@ public class ResumeEntity {
     @Column(name = "skills", length = 1000, nullable = false)
     private String skills;
     @Column(name = "skill_set", length = 1000, nullable = false)
-    // В БД хранится как строка с разделителем ','
     private String skillSet;
     @Column(name = "alternate_url", length = 1000, nullable = false)
     private String alternateUrl;
     @Column(name = "salary")
     private int salary;
+    @Column(name = "rating")
+    private float rating;
     @Column(name = "can_view_full_info", nullable = false)
     private boolean canViewFullInfo;
     @Column(name = "favorited", nullable = false)
@@ -64,16 +65,12 @@ public class ResumeEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "travel_time", nullable = false)
     private TravelTimeType travelTime;
-    // В БД хранится как строка с разделителем ','
     @Column(name = "schedules", length = 1000, nullable = false)
     private String schedules;
-    // В БД хранится как строка с разделителем ','
     @Column(name = "employments", length = 1000, nullable = false)
     private String employments;
-    // В БД хранится как строка с разделителем ','
     @Column(name = "hidden_fields", length = 1000)
     private String hiddenFields;
-    // В БД хранится как строка с разделителем ','
     @Column(name = "driver_license_types", length = 1000)
     private String driverLicenseTypes;
     @Column(name = "total_experience_in_month")
@@ -103,19 +100,16 @@ public class ResumeEntity {
                 .lastName(this.getApplicant().getLastName())
                 .firstName(this.getApplicant().getFirstName())
                 .middleName(this.getApplicant().getMiddleName())
-                .resumeLocale(this.getResumeLocale())
-                .alternateUrl(this.getAlternateUrl())
                 .urlDownloadPdf(this.getUrlDownloadPdf())
                 .urlDownloadRtf(this.getUrlDownloadRtf())
                 .photo(this.getApplicant().getPhotoUrl())
-                .negotiationsHistoryUrl(this.getNegotiationsHistoryUrl())
-                .skillSet(this.getSkillSet().split(","))
-                .driverLicenseTypes(this.getDriverLicenseTypes() == null ? new String[]{} : this.getDriverLicenseTypes().split(","))
-                .schedules(this.getSchedules().split(","))
-                .hiddenFields(this.getHiddenFields() == null ? new String[]{} : this.getHiddenFields().split(","))
+                .skillSet(this.getSkillSet())
+                .driverLicenseTypes(this.getDriverLicenseTypes() == null ? "" : this.getDriverLicenseTypes())
+                .schedules(this.getSchedules())
                 .createdAt(this.getCreatedAt())
                 .updatedAt(this.getUpdatedAt())
                 .birthDate(this.getApplicant().getBirthDate())
+                .rating(this.getRating())
                 .age(this.getApplicant().getAge())
                 .salary(this.getSalary())
                 .totalExperienceInMonth(this.getTotalExperienceInMonth())
@@ -126,13 +120,10 @@ public class ResumeEntity {
                 .travelTime(this.getTravelTime())
                 .educationLevel(this.getApplicant().getEducationLevel())
                 .businessTripReadiness(this.getBusinessTripReadiness())
-                .employments(this.getEmployments().split(","))
+                .employments(this.getEmployments())
                 .area(this.getApplicant().getArea())
                 .site(this.getApplicant().getSite().stream()
                         .map(SiteEntity::toModel)
-                        .toList())
-                .certificates(this.getApplicant().getCertificates().stream()
-                        .map(CertificateEntity::toModel)
                         .toList())
                 .educations(this.getApplicant().getEducations().stream()
                         .map(EducationEntity::toModel)
@@ -140,12 +131,8 @@ public class ResumeEntity {
                 .contacts(this.getApplicant().getContacts().stream()
                         .map(ContactEntity::toModel)
                         .toList())
-                .citizenship(this.getApplicant().getCitizenship().stream()
-                        .map(AreaCitiEntity::toModel)
-                        .toList())
-                .workTickets(this.getApplicant().getWorkTickets().stream()
-                        .map(AreaCitiEntity::toModel)
-                        .toList())
+                .citizenship(this.getApplicant().getCitizenship())
+                .workTickets(this.getApplicant().getWorkTickets())
                 .languages(this.getApplicant().getLanguages().stream()
                         .map(LanguageEntity::toModel)
                         .toList())
@@ -154,9 +141,6 @@ public class ResumeEntity {
                         .toList())
                 .recommendations(this.getRecommendations().stream()
                         .map(RecommendationEntity::toModel)
-                        .toList())
-                .paidServices(this.getPaidServices().stream()
-                        .map(PaidServicesEntity::toModel)
                         .toList())
                 .experience(this.getExperience().stream()
                         .map(ExperienceEntity::toModel)
@@ -203,12 +187,9 @@ public class ResumeEntity {
         StringBuilder stringBuilder = new StringBuilder();
         if (jsonArray == null) return "";
         for (int i = 0; i < jsonArray.length(); i++) {
-            stringBuilder.append(jsonArray.getString(i));
-            if (i != jsonArray.length() - 1) {
-                stringBuilder.append(",");
-            }
+            stringBuilder.append(jsonArray.getString(i)).append(", ");
         }
-        return stringBuilder.toString();
+        return stringBuilder.substring(0, stringBuilder.length() - 2);
     }
 
 }

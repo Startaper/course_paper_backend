@@ -1,6 +1,5 @@
 package com.example.course_paper_backend.entities;
 
-import com.example.course_paper_backend.enums.AreaType;
 import com.example.course_paper_backend.enums.EducationLevel;
 import com.example.course_paper_backend.enums.Gender;
 import jakarta.persistence.*;
@@ -27,25 +26,29 @@ public class ApplicantEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false)
     private UUID id;
+    @Column(name = "area", length = 500)
+    private String area;
+    @Column(name = "photo_url", length = 1000)
+    private String photoUrl;
     @Column(name = "external_id", length = 1000, nullable = false)
     private String externalId;
-    @Column(name = "first_name", nullable = false)
-    private String firstName;
     @Column(name = "last_name", nullable = false)
     private String lastName;
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
     @Column(name = "middle_name")
     private String middleName;
+    @Column(name = "citizenship", length = 1000)
+    private String citizenship;
+    @Column(name = "workTickets", length = 1000)
+    private String workTickets;
+    @Column(name = "age", nullable = false)
+    private int age;
+    @Column(name = "birth_date", nullable = false)
+    private Date birthDate;
     @Enumerated(EnumType.STRING)
     @Column(name = "gender")
     private Gender gender;
-    @Column(name = "birth_date", nullable = false)
-    private Date birthDate;
-    @Column(name = "age", nullable = false)
-    private int age;
-    @Column(name = "photo_url", length = 1000)
-    private String photoUrl;
-    @Column(name = "area", length = 500)
-    private String area;
     @Enumerated(EnumType.STRING)
     @Column(name = "education_level", nullable = false)
     private EducationLevel educationLevel;
@@ -55,10 +58,6 @@ public class ApplicantEntity {
     private List<ResumeEntity> resumes;
     @OneToMany(mappedBy = "applicant", cascade = CascadeType.ALL)
     private List<ContactEntity> contacts;
-    @OneToMany(mappedBy = "applicant", cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE})
-    private List<AreaCitiEntity> citizenship;
-    @OneToMany(mappedBy = "applicant", cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE})
-    private List<AreaCitiEntity> workTickets;
     @OneToMany(mappedBy = "applicant", cascade = CascadeType.ALL)
     private List<LanguageEntity> languages;
     @OneToMany(mappedBy = "applicant", cascade = CascadeType.ALL)
@@ -85,6 +84,7 @@ public class ApplicantEntity {
 //        this.languages = languages;
 //        this.educations = educations;
 //        this.citizenship = citizenship;
+//        Заполнение этих полей реализовано в AdminService -> add()
 //        this.workTickets = workTickets;
 //        this.certificates = certificates;
     }

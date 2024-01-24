@@ -1,7 +1,6 @@
 package com.example.course_paper_backend.entities;
 
 import com.example.course_paper_backend.enums.CertificateType;
-import com.example.course_paper_backend.model.Certificate;
 import jakarta.persistence.*;
 import lombok.*;
 import org.json.JSONException;
@@ -38,17 +37,6 @@ public class CertificateEntity {
     @ManyToOne
     @JoinColumn(name = "applicant_id", referencedColumnName = "id", nullable = false)
     private ApplicantEntity applicant;
-
-    public Certificate toModel(){
-        return new Certificate().toBuilder()
-                .id(this.getId())
-                .type(this.getType())
-                .title(this.getTitle())
-                .achievedAt(this.getAchievedAt())
-                .owner(this.getOwner())
-                .url(this.getUrl())
-                .build();
-    }
 
     public CertificateEntity(JSONObject jsonObject, SimpleDateFormat dateFormat, ApplicantEntity applicant) throws JSONException, ParseException {
         this.type = CertificateType.valueOf(jsonObject.getString("type").toUpperCase());

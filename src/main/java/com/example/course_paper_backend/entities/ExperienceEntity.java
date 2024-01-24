@@ -40,9 +40,8 @@ public class ExperienceEntity {
     private Date start;
     @Column(name = "end_date")
     private Date end;
-    @OneToOne
-    @JoinColumn(name = "area_id", referencedColumnName = "id")
-    private AreaCitiEntity area;
+    @Column(name = "area", nullable = false)
+    private String area;
     @ManyToOne
     @JoinColumn(name = "resume_id", referencedColumnName = "id", nullable = false)
     private ResumeEntity resume;
@@ -50,7 +49,7 @@ public class ExperienceEntity {
     public Experience toModel() {
         return new Experience().toBuilder()
                 .id(this.getId())
-                .area(this.getArea().toModel())
+                .area(this.getArea())
                 .company(this.getCompany())
                 .companyId(this.getCompanyId())
                 .companyUrl(this.getCompanyUrl())
@@ -62,17 +61,17 @@ public class ExperienceEntity {
                 .build();
     }
 
-    public ExperienceEntity(JSONObject jsonObject, ResumeEntity resume, ApplicantEntity applicant, SimpleDateFormat dateFormat) throws JSONException, ParseException {
+    public ExperienceEntity(JSONObject jsonObject, ResumeEntity resume, SimpleDateFormat dateFormat) throws JSONException, ParseException {
         this.id = jsonObject.getLong("id");
         this.company = jsonObject.optString("company");
         this.companyId = jsonObject.optString("company_id");
         this.companyUrl = jsonObject.optString("company_url");
         this.description = jsonObject.optString("description");
-        this.industries = jsonObject.getString("industries");
-        this.position = jsonObject.getString("position");
+        this.industries = jsonObject.optString("industries", "");
+        this.position = jsonObject.optString("position", "");
         this.start = dateFormat.parse(jsonObject.optString("start"));
         this.end = dateFormat.parse(jsonObject.optString("end"));
-        this.area = new AreaCitiEntity(jsonObject.getJSONObject("area"), AreaType.EXPERIENCE, applicant);
+        this.area = jsonObject.getJSONObject("area").optString("name", "");
         this.resume = resume;
     }
 }

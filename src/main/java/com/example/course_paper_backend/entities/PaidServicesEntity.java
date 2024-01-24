@@ -1,6 +1,5 @@
 package com.example.course_paper_backend.entities;
 
-import com.example.course_paper_backend.model.PaidServices;
 import jakarta.persistence.*;
 import lombok.*;
 import org.json.JSONException;
@@ -25,14 +24,6 @@ public class PaidServicesEntity {
     @ManyToOne
     @JoinColumn(name = "resume_id", referencedColumnName = "id", nullable = false)
     private ResumeEntity resume;
-
-    public PaidServices toModel(){
-        return new PaidServices().toBuilder()
-                .id(this.getId())
-                .name(this.getName())
-                .active(this.isActive())
-                .build();
-    }
 
     public PaidServicesEntity(JSONObject jsonObject, ResumeEntity resume) throws JSONException {
         this.id = jsonObject.getString("id");

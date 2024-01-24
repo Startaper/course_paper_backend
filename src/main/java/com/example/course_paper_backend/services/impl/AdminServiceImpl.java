@@ -1,7 +1,6 @@
 package com.example.course_paper_backend.services.impl;
 
 import com.example.course_paper_backend.entities.*;
-import com.example.course_paper_backend.enums.AreaType;
 import com.example.course_paper_backend.enums.EducationType;
 import com.example.course_paper_backend.enums.ResumeStatus;
 import com.example.course_paper_backend.exceptions.AlreadyExistsException;
@@ -28,7 +27,6 @@ public class AdminServiceImpl {
     private final SpecializationRepo specializationRepo;
     private final ExperienceRepo experienceRepo;
     private final LanguageRepo languageRepo;
-    private final AreaCitiRepo areaCitiRepo;
     private final SiteRepo siteRepo;
     private final EducationRepo educationRepo;
     private final RecommendationRepo recommendationRepo;
@@ -39,7 +37,7 @@ public class AdminServiceImpl {
     @Autowired
     public AdminServiceImpl(ResumeRepo resumeRepo, ApplicantRepo applicantRepo, PaidServicesRepo paidServicesRepo,
                             SpecializationRepo specializationRepo, ExperienceRepo experienceRepo,
-                            LanguageRepo languageRepo, AreaCitiRepo areaCitiRepo, SiteRepo siteRepo,
+                            LanguageRepo languageRepo, SiteRepo siteRepo,
                             EducationRepo educationRepo, RecommendationRepo recommendationRepo,
                             CertificateRepo certificateRepo, ContactRepo contactRepo) {
         this.resumeRepo = resumeRepo;
@@ -48,7 +46,6 @@ public class AdminServiceImpl {
         this.specializationRepo = specializationRepo;
         this.experienceRepo = experienceRepo;
         this.languageRepo = languageRepo;
-        this.areaCitiRepo = areaCitiRepo;
         this.siteRepo = siteRepo;
         this.educationRepo = educationRepo;
         this.recommendationRepo = recommendationRepo;
@@ -56,36 +53,66 @@ public class AdminServiceImpl {
         this.contactRepo = contactRepo;
     }
 
+    /**
+     * Метод передает запрос на следующий слой сервиса для удаления объекта из БД по id
+     *
+     * @param id UUID
+     * @throws NotFoundException если не удалось найти в БД объект по указанному id
+     */
     public void deleteById(UUID id) throws NotFoundException {
         if (!resumeRepo.existsById(id)) {
-            throw new NotFoundException("Резюме с указанным id не найден!");
+            throw new NotFoundException("Резюме с указанным id - '" + id + "' не найден!");
         }
         resumeRepo.deleteById(id);
     }
 
+    /**
+     * Метод передает запрос на следующий слой сервиса для удаления всех объектов из БД
+     */
     public void deleteAll() {
         resumeRepo.deleteAll();
         applicantRepo.deleteAll();
     }
 
+    /**
+     * Метод получает список объектов от контролера, проверяет их и сохраняет в БД.
+     * Метод возвращает список сохраненных в БД объектов
+     *
+     * @param jsonArray String
+     * @return List<ResumeEntity>
+     * @throws JSONException          если при парсинге json возникает ошибка
+     * @throws ParseException         если при парсинге дат возникает ошибка
+     * @throws AlreadyExistsException если при сохранении одного и то же объекта более 1 раза возникает ошибка
+     */
     public List<ResumeEntity> addAll(JSONArray jsonArray) throws JSONException, ParseException, AlreadyExistsException {
         List<ResumeEntity> resumes = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++) {
-            resumes.add(add(jsonArray.getJSONObject(i).getJSONObject("resume")));
+            resumes.add(add(jsonArray.getJSONObject(i).getJSONObject("resume"), jsonArray.getJSONObject(i).getString("rating")));
         }
         return resumes;
     }
 
-    public ResumeEntity add(JSONObject json) throws JSONException, ParseException, AlreadyExistsException {
+    /**
+     * Метод получает объект, проверяет его на корректность, преобразует необходимые данные и сохраняет его в БД.
+     * Метод возвращает сохраненный объект.
+     *
+     * @param json JSONObject
+     * @return ResumeEntity
+     * @throws JSONException          если при парсинге json возникает ошибка
+     * @throws ParseException         если при парсинге дат возникает ошибка
+     * @throws AlreadyExistsException если при сохранении одного и то же объекта более 1 раза возникает ошибка
+     */
+    public ResumeEntity add(JSONObject json, String rating) throws JSONException, ParseException, AlreadyExistsException {
         ResumeEntity resume = new ResumeEntity(json, dateFormat);
 
         if (resumeRepo.existsByExternalId(json.getString("id"))) {
-            throw new AlreadyExistsException("Такое резюме уже существует в БД!");
+            throw new AlreadyExistsException("Резюме с id - '" + json.getString("id") + "' уже существует в БД!");
         }
 
 //        resume.setId(UUID.fromString(json.getString("id")));
         resume.setId(UUID.randomUUID());
         resume.setExternalId(json.getString("id"));
+        resume.setRating(Float.parseFloat(rating));
 
         // Проверка существования такого соискателя в базе
         // Если в БД есть схождение, то к "профилю" соискателя добавляется новое резюме
@@ -97,10 +124,10 @@ public class AdminServiceImpl {
         }
         resume.setApplicant(applicantEntity);
 
-        resume.setSchedules(convertFromJsonArrayToString(json.getJSONArray("schedules")));
-        resume.setEmployments(convertFromJsonArrayToString(json.getJSONArray("employments")));
-        resume.setHiddenFields(convertFromJsonArrayToString(json.getJSONArray("hidden_fields")));
-        resume.setDriverLicenseTypes(convertFromJsonArrayToString(json.getJSONArray("driver_license_types")));
+        resume.setSchedules(convertFromJsonArrayToString(json.getJSONArray("schedules"), "name", true));
+        resume.setEmployments(convertFromJsonArrayToString(json.getJSONArray("employments"), "name", true));
+        resume.setHiddenFields(convertFromJsonArrayToString(json.getJSONArray("hidden_fields"), "name", true));
+        resume.setDriverLicenseTypes(convertFromJsonArrayToString(json.getJSONArray("driver_license_types"), "id", true));
         resume.setStatus(ResumeStatus.NEW);
 
         resume = resumeRepo.save(resume);
@@ -108,11 +135,18 @@ public class AdminServiceImpl {
         resume.setPaidServices(convertFromJSONObjectToPaidServicesEntityList(json.getJSONArray("paid_services"), resume));
         resume.setSpecializations(convertFromJSONObjectToSpecializationEntityList(json.getJSONArray("specialization"), resume));
         resume.setRecommendations(convertFromJSONObjectToRecommendationEntityList(json.getJSONArray("recommendation"), resume));
-        resume.setExperience(convertFromJSONObjectToExperienceEntityList(json.getJSONArray("experience"), resume, resume.getApplicant()));
+        resume.setExperience(convertFromJSONObjectToExperienceEntityList(json.getJSONArray("experience"), resume));
 
         return resumeRepo.save(resume);
     }
 
+    /**
+     * Метод генерирует externalId для объекта Applicant.
+     *
+     * @param jsonObject JSONObject
+     * @return String
+     * @throws JSONException если при парсинге json возникает ошибка
+     */
     private String getExternalIdByJson(JSONObject jsonObject) throws JSONException {
         return jsonObject.getInt("age") + "_" +
                 jsonObject.getString("last_name") +
@@ -120,6 +154,15 @@ public class AdminServiceImpl {
                 jsonObject.getString("middle_name");
     }
 
+    /**
+     * Метод создает экземпляр сущности Applicant, и в случае успешного создания сохраняет его в БД.
+     * Метод возвращает сохраненный объект
+     *
+     * @param jsonObject JSONObject
+     * @return ApplicantEntity
+     * @throws JSONException  если при парсинге json возникает ошибка
+     * @throws ParseException если при парсинге дат возникает ошибка
+     */
     private ApplicantEntity getApplicantFromJSONObject(JSONObject jsonObject) throws JSONException, ParseException {
         ApplicantEntity applicant = new ApplicantEntity(jsonObject, dateFormat);
         applicant.setId(UUID.randomUUID());
@@ -130,8 +173,8 @@ public class AdminServiceImpl {
         applicant.setLanguages(convertFromJSONObjectToLanguageEntityList(jsonObject.getJSONArray("language"), applicant));
         applicant.setCertificates(convertFromJSONObjectToCertificateEntityList(jsonObject.getJSONArray("certificate"), applicant));
         applicant.setContacts(convertFromJSONObjectToContactEntityList(jsonObject.getJSONArray("contact"), applicant));
-        applicant.setCitizenship(convertFromJSONObjectToAreaCitiEntityList(jsonObject.getJSONArray("citizenship"), AreaType.CITIZENSHIP, applicant));
-        applicant.setWorkTickets(convertFromJSONObjectToAreaCitiEntityList(jsonObject.getJSONArray("work_ticket"), AreaType.WORK_TICKET, applicant));
+        applicant.setCitizenship(convertFromJsonArrayToString(jsonObject.getJSONArray("citizenship"), "name", false));
+        applicant.setWorkTickets(convertFromJsonArrayToString(jsonObject.getJSONArray("citizenship"), "name", false));
 
         List<EducationEntity> educations = new ArrayList<>();
         JSONArray jsonArray;
@@ -159,13 +202,24 @@ public class AdminServiceImpl {
         return applicantRepo.save(applicant);
     }
 
-    private String convertFromJsonArrayToString(JSONArray jsonArray) throws JSONException {
+    /**
+     * Метод конвертирует массив в строку
+     *
+     * @param jsonArray JSONArray
+     * @return String
+     * @throws JSONException если при парсинге json возникает ошибка
+     */
+    private String convertFromJsonArrayToString(JSONArray jsonArray, String param, boolean upperCase) throws JSONException {
         StringBuilder string = new StringBuilder();
         if (jsonArray == null || jsonArray.length() == 0) return null;
         for (int i = 0; i < jsonArray.length(); i++) {
-            string.append(jsonArray.getJSONObject(i).getString("id").toUpperCase());
+            if (upperCase) {
+                string.append(jsonArray.getJSONObject(i).getString(param).toUpperCase()).append(", ");
+            } else {
+                string.append(jsonArray.getJSONObject(i).getString(param)).append(", ");
+            }
         }
-        return string.toString();
+        return string.substring(0, string.length() - 2);
     }
 
     private List<PaidServicesEntity> convertFromJSONObjectToPaidServicesEntityList(JSONArray jsonArray, ResumeEntity resume) throws JSONException {
@@ -195,11 +249,11 @@ public class AdminServiceImpl {
         return list;
     }
 
-    private List<ExperienceEntity> convertFromJSONObjectToExperienceEntityList(JSONArray jsonArray, ResumeEntity resume, ApplicantEntity applicant) throws JSONException, ParseException {
+    private List<ExperienceEntity> convertFromJSONObjectToExperienceEntityList(JSONArray jsonArray, ResumeEntity resume) throws JSONException, ParseException {
         List<ExperienceEntity> list = new ArrayList<>();
         if (jsonArray == null) return null;
         for (int i = 0; i < jsonArray.length(); i++) {
-            list.add(experienceRepo.save(new ExperienceEntity(jsonArray.getJSONObject(i), resume, applicant, dateFormat)));
+            list.add(experienceRepo.save(new ExperienceEntity(jsonArray.getJSONObject(i), resume, dateFormat)));
         }
         return list;
     }
@@ -236,15 +290,6 @@ public class AdminServiceImpl {
         if (jsonArray == null) return null;
         for (int i = 0; i < jsonArray.length(); i++) {
             list.add(certificateRepo.save(new CertificateEntity(jsonArray.getJSONObject(i), dateFormat, applicant)));
-        }
-        return list;
-    }
-
-    private List<AreaCitiEntity> convertFromJSONObjectToAreaCitiEntityList(JSONArray jsonArray, AreaType type, ApplicantEntity applicant) throws JSONException {
-        List<AreaCitiEntity> list = new ArrayList<>();
-        if (jsonArray == null) return null;
-        for (int i = 0; i < jsonArray.length(); i++) {
-            list.add(areaCitiRepo.save(new AreaCitiEntity(jsonArray.getJSONObject(i), type, applicant)));
         }
         return list;
     }

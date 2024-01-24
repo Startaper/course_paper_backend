@@ -6,12 +6,17 @@ import com.example.course_paper_backend.exceptions.NotFoundException;
 import com.example.course_paper_backend.model.ResponseV1;
 import com.example.course_paper_backend.model.Resume;
 import com.example.course_paper_backend.services.impl.MainServiceImpl;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+/**
+ * Класс-контроллер основной части интерфейса API
+ */
 @RestController
 @RequestMapping("/api/resumes")
 public class MainController {
@@ -23,6 +28,13 @@ public class MainController {
         this.service = service;
     }
 
+    /**
+         * Метод передает запрос на следующий слой сервиса и возвращает объект по запрашиваемому id
+     *
+     * @param id UUID
+     * @return ResponseEntity
+     * @throws NotFoundException если не удалось найти в БД объект по указанному id
+     */
     @GetMapping("/{id}")
     public ResponseEntity get(@PathVariable("id") UUID id) throws NotFoundException {
         return ResponseEntity.ok(new ResponseV1().toBuilder()
@@ -31,18 +43,17 @@ public class MainController {
                 .build());
     }
 
-    @GetMapping("/")
-    public ResponseEntity getAllByFilter(@RequestParam(value = "status", required = false) ResumeStatus status,
-                                         @RequestParam(value = "areaName", required = false) String areaName,
-                                         @RequestParam(value = "gender", required = false) Gender gender,
-                                         @RequestParam(value = "travelTime", required = false) TravelTimeType travelTimeType,
-                                         @RequestParam(value = "educationLevel", required = false) EducationLevel educationLevel,
-                                         @RequestParam(value = "businessTripReadiness", required = false) BusinessTripReadinessType businessTripReadinessType,
-                                         @RequestParam(value = "ageStart", required = false) String ageStart,
-                                         @RequestParam(value = "ageEnd", required = false) String ageEnd,
-                                         @RequestParam(value = "salaryStart", required = false) String salaryStart,
-                                         @RequestParam(value = "salaryEnd", required = false) String salaryEnd) {
-        List<Resume> resumes = service.getAllByFilter(status, areaName, gender, travelTimeType, educationLevel, businessTripReadinessType, ageStart, ageEnd, salaryStart, salaryEnd).stream()
+    /**
+     * Метод передает запрос на следующий слой сервиса и возвращает список объектов по запрошенным фильтрам.
+     * Если не указанны фильтры, то возвращает все объекты из БД
+     *
+     * @param jsonString JSONObject
+     * @return ResponseEntity
+     * @throws JSONException
+     */
+    @PostMapping("/")
+    public ResponseEntity getAllByFilter(@RequestBody(required = false) String jsonString) throws JSONException {
+        List<Resume> resumes = service.getAllByFilter(jsonString).stream()
                 .map(ResumeEntity::toModel)
                 .toList();
         return ResponseEntity.ok(new ResponseV1().toBuilder()
@@ -51,8 +62,16 @@ public class MainController {
                 .build());
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity updateStatus(@PathVariable("id") UUID id, @RequestParam(name = "status") ResumeStatus status)
+    /**
+     * Метод передает запрос на следующий слой сервиса и возвращает объект с обновленным статусом
+     *
+     * @param id UUID
+     * @param status ResumeStatus
+     * @return ResponseEntity
+     * @throws NotFoundException если не удалось найти в БД объект по указанному id
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity updateStatus(@PathVariable("id") UUID id, @RequestParam(name = "newStatus") ResumeStatus status)
             throws NotFoundException {
         return ResponseEntity.ok(new ResponseV1().toBuilder()
                 .count(1)

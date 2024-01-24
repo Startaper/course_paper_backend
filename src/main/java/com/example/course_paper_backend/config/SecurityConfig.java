@@ -19,21 +19,40 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Класс инициализирует новый слой в filterChain-ах, для настройки доступа к эндпоинтам API
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
+    /**
+     * Метод возвращает инициализированный JwtTokenFilter
+     *
+     * @return JwtTokenFilter
+     */
     @Bean
     public JwtTokenFilter jwtTokenFilter() {
         return new JwtTokenFilter();
     }
 
+    /**
+     * Метод возвращает инициализированный UserDetailsService
+     *
+     * @return UserDetailsService
+     */
     @Bean
     public UserDetailsService userDetailsService() {
         return new JwtUserDetailsServices();
     }
 
+    /**
+     * Метод возвращает настроенный filterChain.
+     *
+     * @param http HttpSecurity
+     * @return SecurityFilterChain
+     * @throws Exception если возникли ошибки на стадии настройки доступов
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
@@ -50,6 +69,11 @@ public class SecurityConfig {
                 .build();
     }
 
+    /**
+     * Метод возвращает инициализированный DaoAuthenticationProvider
+     *
+     * @return DaoAuthenticationProvider
+     */
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
@@ -58,11 +82,23 @@ public class SecurityConfig {
         return daoAuthenticationProvider;
     }
 
+    /**
+     * Метод возвращает инициализированный BCryptPasswordEncoder
+     *
+     * @return BCryptPasswordEncoder
+     */
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Метод возвращает инициализированный AuthenticationManager
+     *
+     * @param authenticationConfiguration AuthenticationConfiguration
+     * @return AuthenticationManager
+     * @throws Exception если возникли ошибки при инициализации AuthenticationManager
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();

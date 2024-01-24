@@ -1,6 +1,7 @@
 package com.example.course_paper_backend.entities;
 
 import com.example.course_paper_backend.enums.UserStatus;
+import com.example.course_paper_backend.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -48,5 +49,22 @@ public class UserEntity {
             joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "id")})
     private List<RoleEntity> roles;
+
+    public boolean isAdmin() {
+        List<String> rolesStr = this.getRoles().stream().map(RoleEntity::getName).toList();
+        return rolesStr.contains("ROLE_ADMIN");
+    }
+
+    public User toModel() {
+        return new User().toBuilder()
+                .id(this.getId())
+                .lastName(this.getLastName())
+                .firstName(this.getFirstName())
+                .middleName(this.getMiddleName())
+                .email(this.getEmail())
+                .status(this.getStatus())
+                .admin(isAdmin())
+                .build();
+    }
 
 }

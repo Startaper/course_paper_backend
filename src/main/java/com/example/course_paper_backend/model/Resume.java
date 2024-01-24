@@ -1,6 +1,7 @@
 package com.example.course_paper_backend.model;
 
 import com.example.course_paper_backend.enums.*;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import java.util.Date;
@@ -12,55 +13,46 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class Resume {
 
     private UUID id;
+    private String area;
     private String title;
     private String metro;
+    private String photo;
     private String skills;
+    private String skillSet;
     private String lastName;
     private String firstName;
+    private String schedules;
     private String middleName;
-    private String resumeLocale;
-    private String alternateUrl;
+    private String employments;
+    private String workTickets;
+    private String citizenship;
     private String urlDownloadPdf;
     private String urlDownloadRtf;
-    private String photo;
-    private String negotiationsHistoryUrl;
-    // В БД хранится как строка с разделителем ','
-    private String[] skillSet;
-    // В БД хранится как строка с разделителем ','
-    private String[] driverLicenseTypes;
-    // В БД хранится как строка с разделителем ','
-    private String[] schedules;
-    // В БД хранится как строка с разделителем ','
-    private String[] hiddenFields;
+    private String driverLicenseTypes;
     private Date createdAt;
     private Date updatedAt;
     private Date birthDate;
     private int age;
     private int salary;
+    private float rating;
     private int totalExperienceInMonth;
     private boolean viewed;
     private boolean favorited;
     private boolean canViewFullInfo;
-    private String area;
     private Gender gender;
     private ResumeStatus status;
     private TravelTimeType travelTime;
-    // В БД хранится как строка с разделителем ','
-    private String[] employments;
     private EducationLevel educationLevel;
     private BusinessTripReadinessType businessTripReadiness;
     private List<Site> site;
-    private List<Area> workTickets;
-    private List<Area> citizenship;
     private List<Contact> contacts;
     private List<Language> languages;
     private List<Education> educations;
     private List<Experience> experience;
-    private List<Certificate> certificates;
-    private List<PaidServices> paidServices;
     private List<Recommendation> recommendations;
     private List<Specialization> specializations;
 
