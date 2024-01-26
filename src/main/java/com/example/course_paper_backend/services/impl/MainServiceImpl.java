@@ -64,7 +64,6 @@ public class MainServiceImpl implements BasicService<Resume, ResumeEntity> {
         String businessTripReadiness = jsonObject.optString("businessTripReadiness");
         String educationLevel = jsonObject.optString("educationLevel");
         String areaName = jsonObject.optString("areaName");
-        String skillSet = jsonObject.optString("skillSet");
         int ageStart = jsonObject.optInt("ageStart", -1);
         int ageEnd = jsonObject.optInt("ageEnd", -1);
         int salaryStart = jsonObject.optInt("salaryStart", -1);
@@ -72,9 +71,6 @@ public class MainServiceImpl implements BasicService<Resume, ResumeEntity> {
 
         if (!areaName.isBlank()) {
             result.retainAll(resumeRepo.findAllByApplicant_Area(areaName));
-        }
-        if (!skillSet.isBlank()) {
-            result.retainAll(resumeRepo.findAllBySkillSetContaining(skillSet));
         }
         if (!status.isBlank()) {
             result.retainAll(resumeRepo.findAllByStatus(ResumeStatus.valueOf(status)));

@@ -32,6 +32,7 @@ public class Resume {
     private String citizenship;
     private String urlDownloadPdf;
     private String urlDownloadRtf;
+    private String specializations;
     private String driverLicenseTypes;
     private Date createdAt;
     private Date updatedAt;
@@ -54,6 +55,5 @@ public class Resume {
     private List<Education> educations;
     private List<Experience> experience;
     private List<Recommendation> recommendations;
-    private List<Specialization> specializations;
 
 }

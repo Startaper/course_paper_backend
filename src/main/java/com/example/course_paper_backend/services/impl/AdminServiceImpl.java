@@ -24,7 +24,6 @@ public class AdminServiceImpl {
     private final ResumeRepo resumeRepo;
     private final ApplicantRepo applicantRepo;
     private final PaidServicesRepo paidServicesRepo;
-    private final SpecializationRepo specializationRepo;
     private final ExperienceRepo experienceRepo;
     private final LanguageRepo languageRepo;
     private final SiteRepo siteRepo;
@@ -36,14 +35,12 @@ public class AdminServiceImpl {
 
     @Autowired
     public AdminServiceImpl(ResumeRepo resumeRepo, ApplicantRepo applicantRepo, PaidServicesRepo paidServicesRepo,
-                            SpecializationRepo specializationRepo, ExperienceRepo experienceRepo,
-                            LanguageRepo languageRepo, SiteRepo siteRepo,
+                            ExperienceRepo experienceRepo, LanguageRepo languageRepo, SiteRepo siteRepo,
                             EducationRepo educationRepo, RecommendationRepo recommendationRepo,
                             CertificateRepo certificateRepo, ContactRepo contactRepo) {
         this.resumeRepo = resumeRepo;
         this.applicantRepo = applicantRepo;
         this.paidServicesRepo = paidServicesRepo;
-        this.specializationRepo = specializationRepo;
         this.experienceRepo = experienceRepo;
         this.languageRepo = languageRepo;
         this.siteRepo = siteRepo;
@@ -133,7 +130,6 @@ public class AdminServiceImpl {
         resume = resumeRepo.save(resume);
 
         resume.setPaidServices(convertFromJSONObjectToPaidServicesEntityList(json.getJSONArray("paid_services"), resume));
-        resume.setSpecializations(convertFromJSONObjectToSpecializationEntityList(json.getJSONArray("specialization"), resume));
         resume.setRecommendations(convertFromJSONObjectToRecommendationEntityList(json.getJSONArray("recommendation"), resume));
         resume.setExperience(convertFromJSONObjectToExperienceEntityList(json.getJSONArray("experience"), resume));
 
@@ -227,15 +223,6 @@ public class AdminServiceImpl {
         if (jsonArray == null) return null;
         for (int i = 0; i < jsonArray.length(); i++) {
             list.add(paidServicesRepo.save(new PaidServicesEntity(jsonArray.getJSONObject(i), resume)));
-        }
-        return list;
-    }
-
-    private List<SpecializationEntity> convertFromJSONObjectToSpecializationEntityList(JSONArray jsonArray, ResumeEntity resume) throws JSONException {
-        List<SpecializationEntity> list = new ArrayList<>();
-        if (jsonArray == null) return null;
-        for (int i = 0; i < jsonArray.length(); i++) {
-            list.add(specializationRepo.save(new SpecializationEntity(jsonArray.getJSONObject(i), resume)));
         }
         return list;
     }

@@ -46,6 +46,8 @@ public class ResumeEntity {
     private String skillSet;
     @Column(name = "alternate_url", length = 1000, nullable = false)
     private String alternateUrl;
+    @Column(name = "specializations", length = 10000, nullable = false)
+    private String specializations;
     @Column(name = "salary")
     private int salary;
     @Column(name = "rating")
@@ -88,64 +90,9 @@ public class ResumeEntity {
     private List<RecommendationEntity> recommendations;
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
     private List<ExperienceEntity> experience;
-    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL)
-    private List<SpecializationEntity> specializations;
 
     public Resume toModel() {
-        return new Resume().toBuilder()
-                .id(this.getId())
-                .gender(this.getApplicant().getGender())
-                .title(this.getTitle())
-                .skills(this.getSkills())
-                .lastName(this.getApplicant().getLastName())
-                .firstName(this.getApplicant().getFirstName())
-                .middleName(this.getApplicant().getMiddleName())
-                .urlDownloadPdf(this.getUrlDownloadPdf())
-                .urlDownloadRtf(this.getUrlDownloadRtf())
-                .photo(this.getApplicant().getPhotoUrl())
-                .skillSet(this.getSkillSet())
-                .driverLicenseTypes(this.getDriverLicenseTypes() == null ? "" : this.getDriverLicenseTypes())
-                .schedules(this.getSchedules())
-                .createdAt(this.getCreatedAt())
-                .updatedAt(this.getUpdatedAt())
-                .birthDate(this.getApplicant().getBirthDate())
-                .rating(this.getRating())
-                .age(this.getApplicant().getAge())
-                .salary(this.getSalary())
-                .totalExperienceInMonth(this.getTotalExperienceInMonth())
-                .viewed(this.isViewed())
-                .favorited(this.isFavorited())
-                .canViewFullInfo(this.isCanViewFullInfo())
-                .status(this.getStatus())
-                .travelTime(this.getTravelTime())
-                .educationLevel(this.getApplicant().getEducationLevel())
-                .businessTripReadiness(this.getBusinessTripReadiness())
-                .employments(this.getEmployments())
-                .area(this.getApplicant().getArea())
-                .site(this.getApplicant().getSite().stream()
-                        .map(SiteEntity::toModel)
-                        .toList())
-                .educations(this.getApplicant().getEducations().stream()
-                        .map(EducationEntity::toModel)
-                        .toList())
-                .contacts(this.getApplicant().getContacts().stream()
-                        .map(ContactEntity::toModel)
-                        .toList())
-                .citizenship(this.getApplicant().getCitizenship())
-                .workTickets(this.getApplicant().getWorkTickets())
-                .languages(this.getApplicant().getLanguages().stream()
-                        .map(LanguageEntity::toModel)
-                        .toList())
-                .specializations(this.getSpecializations().stream()
-                        .map(SpecializationEntity::toModel)
-                        .toList())
-                .recommendations(this.getRecommendations().stream()
-                        .map(RecommendationEntity::toModel)
-                        .toList())
-                .experience(this.getExperience().stream()
-                        .map(ExperienceEntity::toModel)
-                        .toList())
-                .build();
+        return new Resume().toBuilder().id(this.getId()).gender(this.getApplicant().getGender()).title(this.getTitle()).skills(this.getSkills()).lastName(this.getApplicant().getLastName()).firstName(this.getApplicant().getFirstName()).middleName(this.getApplicant().getMiddleName()).urlDownloadPdf(this.getUrlDownloadPdf()).urlDownloadRtf(this.getUrlDownloadRtf()).photo(this.getApplicant().getPhotoUrl()).skillSet(this.getSkillSet()).driverLicenseTypes(this.getDriverLicenseTypes() == null ? "" : this.getDriverLicenseTypes()).schedules(this.getSchedules()).createdAt(this.getCreatedAt()).updatedAt(this.getUpdatedAt()).birthDate(this.getApplicant().getBirthDate()).rating(this.getRating()).age(this.getApplicant().getAge()).salary(this.getSalary()).totalExperienceInMonth(this.getTotalExperienceInMonth()).viewed(this.isViewed()).favorited(this.isFavorited()).canViewFullInfo(this.isCanViewFullInfo()).status(this.getStatus()).travelTime(this.getTravelTime()).educationLevel(this.getApplicant().getEducationLevel()).businessTripReadiness(this.getBusinessTripReadiness()).employments(this.getEmployments()).area(this.getApplicant().getArea()).site(this.getApplicant().getSite().stream().map(SiteEntity::toModel).toList()).educations(this.getApplicant().getEducations().stream().map(EducationEntity::toModel).toList()).contacts(this.getApplicant().getContacts().stream().map(ContactEntity::toModel).toList()).citizenship(this.getApplicant().getCitizenship()).workTickets(this.getApplicant().getWorkTickets()).languages(this.getApplicant().getLanguages().stream().map(LanguageEntity::toModel).toList()).specializations(this.getSpecializations()).recommendations(this.getRecommendations().stream().map(RecommendationEntity::toModel).toList()).experience(this.getExperience().stream().map(ExperienceEntity::toModel).toList()).build();
     }
 
     public ResumeEntity(JSONObject jsonObject, SimpleDateFormat dateFormat) throws JSONException, ParseException {
@@ -156,7 +103,8 @@ public class ResumeEntity {
         this.createdAt = dateFormat.parse(jsonObject.getString("created_at"));
         this.updatedAt = dateFormat.parse(jsonObject.getString("updated_at"));
         this.skills = jsonObject.getString("skills");
-        this.skillSet = convertSkillSetToString(jsonObject.getJSONArray("skill_set"));
+        this.skillSet = convertJSONArrayToString(jsonObject.getJSONArray("skill_set"), false, "");
+        this.specializations = convertJSONArrayToString(jsonObject.getJSONArray("specialization"), true, "name");
         this.alternateUrl = jsonObject.getString("alternate_url");
         this.salary = jsonObject.optInt("salary");
         this.canViewFullInfo = jsonObject.getBoolean("can_view_full_info");
@@ -174,20 +122,32 @@ public class ResumeEntity {
         this.totalExperienceInMonth = jsonObject.optInt("total_experience_in_month");
         this.negotiationsHistoryUrl = jsonObject.getJSONObject("negotiations_history").getString("url");
         this.resumeLocale = jsonObject.getJSONObject("resume_locale").getString("id");
-        this.businessTripReadiness = BusinessTripReadinessType.valueOf(jsonObject.getJSONObject("business_trip_readiness")
-                .getString("id").toUpperCase());
+        this.businessTripReadiness = BusinessTripReadinessType.valueOf(jsonObject.getJSONObject("business_trip_readiness").getString("id").toUpperCase());
 //        Заполнение этих объектов реализован в AdminService -> convertFromJSONObjectTo{Entity}List()
 //        this.paidServices = paidServices;
 //        this.recommendations = recommendations;
 //        this.experience = experience;
-//        this.specializations = specializations;
     }
 
-    private String convertSkillSetToString(JSONArray jsonArray) throws JSONException {
+    /**
+     * Метод конвертирует массив jsonArray в строку.
+     *
+     * @param jsonArray           JSONArray, Массив данных
+     * @param isJsonObject        Boolean, Если строка строится на основании пола объекта, то true, иначе false
+     * @param nameParamJsonObject String, Имя поля, по которому будет строиться строка,
+     *                            если isJsonObject равен true, то поле обязательно для заполнения
+     * @return String, конвертированная строка
+     * @throws JSONException если при парсинге json возникли ошибки
+     */
+    private String convertJSONArrayToString(JSONArray jsonArray, boolean isJsonObject, String nameParamJsonObject) throws JSONException {
         StringBuilder stringBuilder = new StringBuilder();
-        if (jsonArray == null) return "";
+        if (jsonArray == null || jsonArray.length() == 0) return "";
         for (int i = 0; i < jsonArray.length(); i++) {
-            stringBuilder.append(jsonArray.getString(i)).append(", ");
+            if (isJsonObject) {
+                stringBuilder.append(jsonArray.getJSONObject(i).optString(nameParamJsonObject)).append(", ");
+            } else {
+                stringBuilder.append(jsonArray.getString(i)).append(", ");
+            }
         }
         return stringBuilder.substring(0, stringBuilder.length() - 2);
     }

@@ -20,6 +20,5 @@ public interface ResumeRepo extends CrudRepository<ResumeEntity, UUID> {
     List<ResumeEntity> findAllByApplicant_EducationLevel(EducationLevel educationLevel);
     List<ResumeEntity> findAllByApplicant_AgeBetween(int ageStart, int ageEnd);
     List<ResumeEntity> findAllBySalaryBetween(int salaryStart, int salaryEnd);
-    List<ResumeEntity> findAllBySkillSetContaining(String skillSet);
 
 }
