@@ -9,6 +9,7 @@ import com.example.course_paper_backend.exceptions.NotFoundException;
 import com.example.course_paper_backend.model.User;
 import com.example.course_paper_backend.repositories.RoleRepository;
 import com.example.course_paper_backend.repositories.UserRepository;
+import com.example.course_paper_backend.services.mail.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -100,7 +101,12 @@ public class UserService {
         userEntity.setCreatedAt(new Date());
         userEntity.setUpdatedAt(new Date());
 
-//        Отправка на указанную почту логина и пароля пользователя.
+        MailService.sentMessage(
+                userEntity.getEmail(),
+                "Данные для входа в ЛК HR Assistant",
+                "Здравствуйте, вы успешно зарегистрировались в системе. Ваши данные для входа в ЛК: \n" +
+                        "Логин: " + username + "\n Пароль: " + generatedPassword
+        );
 
         return userRepository.save(userEntity);
     }
