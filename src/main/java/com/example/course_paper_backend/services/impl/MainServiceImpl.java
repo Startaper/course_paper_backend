@@ -4,6 +4,7 @@ import com.example.course_paper_backend.entities.ResumeEntity;
 import com.example.course_paper_backend.enums.*;
 import com.example.course_paper_backend.exceptions.NotFoundException;
 import com.example.course_paper_backend.model.Resume;
+import com.example.course_paper_backend.repositories.ApplicantRepo;
 import com.example.course_paper_backend.repositories.ResumeRepo;
 import com.example.course_paper_backend.services.BasicService;
 import org.json.JSONException;
@@ -11,9 +12,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Класс описывающий логику работы основного сервиса.
@@ -22,10 +21,12 @@ import java.util.UUID;
 public class MainServiceImpl implements BasicService<Resume, ResumeEntity> {
 
     private final ResumeRepo resumeRepo;
+    private final ApplicantRepo applicantRepo;
 
     @Autowired
-    public MainServiceImpl(ResumeRepo resumeRepo) {
+    public MainServiceImpl(ResumeRepo resumeRepo, ApplicantRepo applicantRepo) {
         this.resumeRepo = resumeRepo;
+        this.applicantRepo = applicantRepo;
     }
 
     /**
@@ -51,9 +52,9 @@ public class MainServiceImpl implements BasicService<Resume, ResumeEntity> {
      */
     public List<ResumeEntity> getAllByFilter(String jsonString) throws JSONException {
         List<ResumeEntity> result = new ArrayList<>();
-        resumeRepo.findAll().forEach(result::add);
 
         if (jsonString == null || jsonString.isBlank()) {
+            resumeRepo.findAll().forEach(result::add);
             return result;
         }
         JSONObject jsonObject = new JSONObject(jsonString);
@@ -61,55 +62,70 @@ public class MainServiceImpl implements BasicService<Resume, ResumeEntity> {
         String status = jsonObject.optString("status");
         String gender = jsonObject.optString("gender");
         String travelTime = jsonObject.optString("travelTime");
-        String businessTripReadiness = jsonObject.optString("businessTripReadiness");
+        String busTripRead = jsonObject.optString("businessTripReadiness");
         String educationLevel = jsonObject.optString("educationLevel");
-        String areaName = jsonObject.optString("areaName");
+        String areaName = jsonObject.optString("areaName", null);
         int ageStart = jsonObject.optInt("ageStart", -1);
         int ageEnd = jsonObject.optInt("ageEnd", -1);
         int salaryStart = jsonObject.optInt("salaryStart", -1);
         int salaryEnd = jsonObject.optInt("salaryEnd", -1);
 
-        if (!areaName.isBlank()) {
-            result.retainAll(resumeRepo.findAllByApplicant_Area(areaName));
-        }
-        if (!status.isBlank()) {
-            result.retainAll(resumeRepo.findAllByStatus(ResumeStatus.valueOf(status)));
-        }
-        if (!gender.isBlank()) {
-            result.retainAll(resumeRepo.findAllByApplicant_Gender(Gender.valueOf(gender)));
-        }
-        if (!travelTime.isBlank()) {
-            result.retainAll(resumeRepo.findAllByTravelTime(TravelTimeType.valueOf(travelTime)));
-        }
-        if (!educationLevel.isBlank()) {
-            result.retainAll(resumeRepo.findAllByApplicant_EducationLevel(EducationLevel.valueOf(educationLevel)));
-        }
-        if (!businessTripReadiness.isBlank()) {
-            result.retainAll(resumeRepo.findAllByBusinessTripReadiness(BusinessTripReadinessType.valueOf(businessTripReadiness)));
-        }
-        int start = 0;
-        int end = Integer.MAX_VALUE;
+        result = resumeRepo.findAllByFilters(
+                enumValueOf(Gender.class, gender),
+                enumValueOf(EducationLevel.class, educationLevel),
+                enumValueOf(ResumeStatus.class, status),
+                enumValueOf(TravelTimeType.class, travelTime),
+                enumValueOf(BusinessTripReadinessType.class, busTripRead),
+                areaName,
+                ageStart == -1 ? null : ageStart,
+                ageEnd == -1 ? null : ageEnd,
+                salaryStart == -1 ? null : salaryStart,
+                salaryEnd == -1 ? null : salaryEnd
+        );
 
-        // Age between start, end
-        if (ageStart != -1) {
-            start = ageStart;
-        }
-        if (ageEnd != -1) {
-            end = ageEnd;
-        }
-        result.retainAll(resumeRepo.findAllByApplicant_AgeBetween(start, end));
 
-        start = 0;
-        end = Integer.MAX_VALUE;
-
-        // Salary between start, end
-        if (salaryStart != -1) {
-            start = salaryStart;
-        }
-        if (salaryEnd != -1) {
-            end = salaryEnd;
-        }
-        result.retainAll(resumeRepo.findAllBySalaryBetween(start, end));
+//
+//        if (!areaName.isBlank()) {
+//            result.retainAll(resumeRepo.findAllByApplicant_Area(areaName));
+//        }
+//        if (!status.isBlank()) {
+//            result.retainAll(resumeRepo.findAllByStatus(ResumeStatus.valueOf(status)));
+//        }
+//        if (!gender.isBlank()) {
+//            result.retainAll(resumeRepo.findAllByApplicant_Gender(Gender.valueOf(gender)));
+//        }
+//        if (!travelTime.isBlank()) {
+//            result.retainAll(resumeRepo.findAllByTravelTime(TravelTimeType.valueOf(travelTime)));
+//        }
+//        if (!educationLevel.isBlank()) {
+//            result.retainAll(resumeRepo.findAllByApplicant_EducationLevel(EducationLevel.valueOf(educationLevel)));
+//        }
+//        if (!businessTripReadiness.isBlank()) {
+//            result.retainAll(resumeRepo.findAllByBusinessTripReadiness(BusinessTripReadinessType.valueOf(businessTripReadiness)));
+//        }
+//        int start = 0;
+//        int end = Integer.MAX_VALUE;
+//
+//        // Age between start, end
+//        if (ageStart != -1) {
+//            start = ageStart;
+//        }
+//        if (ageEnd != -1) {
+//            end = ageEnd;
+//        }
+//        result.retainAll(resumeRepo.findAllByApplicant_AgeBetween(start, end));
+//
+//        start = 0;
+//        end = Integer.MAX_VALUE;
+//
+//        // Salary between start, end
+//        if (salaryStart != -1) {
+//            start = salaryStart;
+//        }
+//        if (salaryEnd != -1) {
+//            end = salaryEnd;
+//        }
+//        result.retainAll(resumeRepo.findAllBySalaryBetween(start, end));
 
         return result;
     }
@@ -128,6 +144,42 @@ public class MainServiceImpl implements BasicService<Resume, ResumeEntity> {
                 .orElseThrow(() -> new NotFoundException("Резюме с указанным id не найден!"));
         resumeEntity.setStatus(status);
         return resumeRepo.save(resumeEntity);
+    }
+
+    /**
+     * Метод возвращает аналитические данные
+     *
+     * @return JSONObject возвращается в формате Json
+     * @throws JSONException если возникли ошибки при парсинге
+     */
+    public JSONObject getAnalytics() throws JSONException {
+        JSONObject analytics = new JSONObject();
+
+        analytics.put("count", resumeRepo.count());
+        analytics.put("avgSalary", Math.round(resumeRepo.avgSalary()));
+        analytics.put("minSalary", resumeRepo.minSalary());
+        analytics.put("maxSalary", resumeRepo.maxSalary());
+        analytics.put("avgAge", Math.round(applicantRepo.avgAge()));
+        analytics.put("minAge", applicantRepo.minAge());
+        analytics.put("maxAge", applicantRepo.maxAge());
+
+        return analytics;
+    }
+
+    /**
+     * Метод ищет по наименованию Enum в enumClass.
+     * Если метод не нашел, то результатом возвращается null.
+     *
+     * @param enumClass Class<T> enumClass Enum-класс, в котором осуществляется поиск.
+     * @param name имя
+     * @return найденный Enum
+     * @param <T> Enum-класс
+     */
+    public static <T extends Enum<T>> T enumValueOf(Class<T> enumClass, String name) {
+        if (name == null || name.isEmpty()) {
+            return null;
+        }
+        return Enum.valueOf(enumClass, name);
     }
 
     /**

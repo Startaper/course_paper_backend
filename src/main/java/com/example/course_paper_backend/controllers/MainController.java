@@ -1,18 +1,20 @@
 package com.example.course_paper_backend.controllers;
 
 import com.example.course_paper_backend.entities.ResumeEntity;
-import com.example.course_paper_backend.enums.*;
+import com.example.course_paper_backend.enums.ResumeStatus;
 import com.example.course_paper_backend.exceptions.NotFoundException;
 import com.example.course_paper_backend.model.ResponseV1;
 import com.example.course_paper_backend.model.Resume;
 import com.example.course_paper_backend.services.impl.MainServiceImpl;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Класс-контроллер основной части интерфейса API
@@ -77,6 +79,11 @@ public class MainController {
                 .count(1)
                 .resumes(Collections.singletonList(service.updateStatus(id, status).toModel()))
                 .build());
+    }
+
+    @GetMapping(value = "/analytics/")
+    public ResponseEntity getAnalytics() throws JSONException {
+        return ResponseEntity.ok(service.getAnalytics().toString());
     }
 
 }

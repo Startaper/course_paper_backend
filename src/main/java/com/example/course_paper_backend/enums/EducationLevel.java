@@ -20,4 +20,5 @@ public enum EducationLevel {
     public String getName() {
         return name;
     }
+
 }
