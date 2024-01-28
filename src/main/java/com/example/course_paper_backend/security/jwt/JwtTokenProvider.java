@@ -5,6 +5,7 @@ import com.example.course_paper_backend.exceptions.JwtAuthenticationException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,10 +76,11 @@ public class JwtTokenProvider {
         try {
             JwtParser jwtParser = Jwts.parserBuilder().setSigningKey(secretKey).build();
             claims = jwtParser.parseClaimsJws(token);
-        } catch (Exception e) {
+            return !claims.getBody().getExpiration().before(new Date());
+        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException |
+                 IllegalArgumentException e) {
             throw new JwtAuthenticationException("Не валидный токен!");
         }
-        return !claims.getBody().getExpiration().before(new Date());
     }
 
     private List<String> getRoleNames(List<RoleEntity> userRoles) {
